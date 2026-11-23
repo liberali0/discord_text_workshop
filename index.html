@@ -345,12 +345,12 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
     </section>
 
     <section class="panel" data-p="mention" hidden>
-      <div class="segm" id="mType" role="group" aria-label="태그 종류">
-        <button data-t="user" aria-pressed="true">@ 사용자</button><button data-t="role" aria-pressed="false">@ 역할</button><button data-t="channel" aria-pressed="false"># 채널</button><button data-t="emoji" aria-pressed="false">: 이모지</button>
+      <div class="segm" id="mType" role="group" aria-label="태그 종류" style="grid-template-columns:repeat(3,minmax(0,1fr))">
+        <button data-t="user" aria-pressed="true">@ 멘션</button><button data-t="channel" aria-pressed="false"># 채널</button><button data-t="emoji" aria-pressed="false">: 이모지</button>
       </div>
-      <div class="inline"><input type="text" id="mText" aria-label="태그할 이름" autocomplete="off"><button class="btn sm" id="mInsert">넣기</button></div>
+      <div class="inline"><input type="text" id="mText" aria-label="태그할 이름" autocomplete="off"><button class="btn sm" id="mInsert">넣기</button><button class="btn sm soft" id="mInsertRole" hidden>역할 ID로</button></div>
       <div class="row" style="gap:6px"><button class="chip" data-quick="@everyone">@everyone</button><button class="chip" data-quick="@here">@here</button></div>
-      <p class="hint">편집기에서 바로 @이름, #채널을 써도 선택지가 뜹니다. 여기서는 이름을 쓰고 Enter를 누르면 태그가 들어갑니다. 디스코드에서 보내면 이름이 같은 대상이 태그됩니다. 숫자 ID를 넣으면 ID 코드로 바꿉니다(봇·웹훅용).</p>
+      <p class="hint">편집기에서 바로 @이름, #채널을 써도 됩니다. 사용자·역할은 모두 <b>@이름</b>으로 똑같이 나갑니다. 숫자 ID를 넣을 때만 사용자 ID와 역할 ID를 고릅니다(봇·웹훅용).</p>
     </section>
 
     <section class="panel" data-p="tpl" hidden>
@@ -981,8 +981,10 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
     mpItems = [];
     if (sign === "@") {
       for (const sp of ["everyone", "here"]) if (sp.startsWith(q.toLowerCase())) mpItems.push(["@", "@" + sp, "모두 알림", "@" + sp, "@" + sp]);
-      mpItems.push(["@", "@" + (isId ? "사용자 (ID)" : q), "사용자", isId ? "<@" + q + ">" : "@" + q]);
-      mpItems.push(["@", "@" + (isId ? "역할 (ID)" : q), "역할", isId ? "<@&" + q + ">" : "@" + q]);
+      if (isId) {
+        mpItems.push(["@", "@사용자 (ID)", "사용자 ID", "<@" + q + ">"]);
+        mpItems.push(["@", "@역할 (ID)", "역할 ID", "<@&" + q + ">"]);
+      } else mpItems.push(["@", "@" + q, "멘션", "@" + q]);
     } else {
       const ch = q.replace(/\s+/g, "-");
       mpItems.push(["#", "#" + (isId ? "채널 (ID)" : ch), "채널", isId ? "<#" + q + ">" : "#" + ch]);
@@ -1242,32 +1244,42 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
 
   /* --- 멘션 --- */
   const MT = {
-    user: ["사용자", "예: 철수", (n) => "@" + n, (id) => "<@" + id + ">"],
-    role: ["역할", "예: 운영진", (n) => "@" + n, (id) => "<@&" + id + ">"],
+    user: ["멘션", "예: 철수, 운영진", (n) => "@" + n, (id) => "<@" + id + ">"],
+    role: ["역할", "", (n) => "@" + n, (id) => "<@&" + id + ">"],
     channel: ["채널", "예: 공지사항", (n) => "#" + n.replace(/\s+/g, "-"), (id) => "<#" + id + ">"],
     emoji: ["이모지", "예: smile", (n) => ":" + n.replace(/\s+/g, "_") + ":", null],
   };
   let mType = "user";
+  const isIdV = () => /^\d{15,21}$/.test($("mText").value.trim().replace(/^[@#:]+/, ""));
+  function mIdState() {
+    const idMode = mType === "user" && isIdV();
+    $("mInsert").textContent = idMode ? "사용자 ID로" : "넣기";
+    $("mInsertRole").hidden = !idMode;
+  }
   function setMType(t) {
     mType = t;
     document.querySelectorAll("#mType button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.t === t)));
-    $("mText").placeholder = MT[t][0] + " 이름 (" + MT[t][1] + ")";
+    $("mText").placeholder = t === "user" ? "이름 또는 숫자 ID (예: 철수, 운영진)" : MT[t][0] + " 이름 (" + MT[t][1] + ")";
+    mIdState();
   }
   document.querySelectorAll("#mType button").forEach((b) => b.addEventListener("click", () => { setMType(b.dataset.t); $("mText").focus(); }));
   setMType("user");
-  function insertMention() {
+  $("mText").addEventListener("input", mIdState);
+  function insertMention(asRole) {
     const v = $("mText").value.trim().replace(/^[@#:]+|:+$/g, "");
     if (!v) { $("mText").focus(); return toast("태그할 " + MT[mType][0] + " 이름을 써 주십시오"); }
-    const [label, , byName, byId] = MT[mType];
+    const t = mType === "user" && asRole === true ? "role" : mType;
+    const [, , byName, byId] = MT[t];
     const isId = /^\d{15,21}$/.test(v) && byId;
     const raw = isId ? byId(v) : byName(v);
-    const look = isId ? (mType === "channel" ? "# " : "@") + label + " (ID)" : byName(v);
+    const look = isId ? (t === "channel" ? "# 채널" : t === "role" ? "@역할" : "@사용자") + " (ID)" : byName(v);
     insertTok(tok(raw, look));
-    $("mText").value = "";
+    $("mText").value = ""; mIdState();
     toast(look + " 태그를 넣었습니다");
   }
-  $("mInsert").addEventListener("click", insertMention);
-  $("mText").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); insertMention(); } });
+  $("mInsert").addEventListener("click", () => insertMention(false));
+  $("mInsertRole").addEventListener("click", () => insertMention(true));
+  $("mText").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); insertMention(false); } });
   document.querySelectorAll("[data-quick]").forEach((b) => b.addEventListener("click", () => { insertTok(tok(b.dataset.quick, b.dataset.quick)); toast(b.dataset.quick + " 태그를 넣었습니다"); }));
 
   /* --- 템플릿 --- */
