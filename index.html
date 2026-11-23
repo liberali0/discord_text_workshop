@@ -9,15 +9,16 @@
 <style>
 /* Layout: 상단 앱 바 → [편집 카드(리본 툴바 · 디스코드 모양 편집면 · 하단 고정 바)] + [도구 옆 패널]. 좁으면 옆 패널이 하단 시트로 */
 :root {
-  --accent: #10a38c;
+  --accent: #7a5bcf;
   --accent-ink: #ffffff;
-  --bg: #eef1f4;
+  --accent-soft: #9b7ede;
+  --bg: #f1eff7;
   --surface: #ffffff;
-  --surface-2: #f2f4f7;
-  --surface-3: #e7ebef;
-  --fg: #141920;
-  --muted: #5d6874;
-  --line: #e0e5ea;
+  --surface-2: #f4f2f9;
+  --surface-3: #ebe7f3;
+  --fg: #17141f;
+  --muted: #645e72;
+  --line: #e4e0ec;
   --shadow-sm: 0 1px 2px rgba(16, 24, 32, .06);
   --shadow: 0 1px 2px rgba(16, 24, 32, .05), 0 12px 32px -8px rgba(16, 24, 32, .12);
   --shadow-pop: 0 4px 12px rgba(16, 24, 32, .12), 0 20px 48px -12px rgba(16, 24, 32, .28);
@@ -30,13 +31,13 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0c0f12; --surface: #15191d; --surface-2: #1c2126; --surface-3: #252b31; --fg: #e9edf0; --muted: #96a1ab; --line: #272e35;
+    --accent: #9b7ede; --accent-ink: #160f2a; --accent-soft: #b39cf0; --bg: #0e0c14; --surface: #17141f; --surface-2: #1f1b29; --surface-3: #292434; --fg: #ece9f3; --muted: #a29bb2; --line: #2d2839;
     --shadow-sm: 0 1px 2px rgba(0,0,0,.4); --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px -8px rgba(0,0,0,.5); --shadow-pop: 0 4px 12px rgba(0,0,0,.4), 0 20px 48px -12px rgba(0,0,0,.7);
     --warn: #f0b429; --danger: #ff6b62; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0c0f12; --surface: #15191d; --surface-2: #1c2126; --surface-3: #252b31; --fg: #e9edf0; --muted: #96a1ab; --line: #272e35;
+  --accent: #9b7ede; --accent-ink: #160f2a; --accent-soft: #b39cf0; --bg: #0e0c14; --surface: #17141f; --surface-2: #1f1b29; --surface-3: #292434; --fg: #ece9f3; --muted: #a29bb2; --line: #2d2839;
   --shadow-sm: 0 1px 2px rgba(0,0,0,.4); --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px -8px rgba(0,0,0,.5); --shadow-pop: 0 4px 12px rgba(0,0,0,.4), 0 20px 48px -12px rgba(0,0,0,.7);
   --warn: #f0b429; --danger: #ff6b62; color-scheme: dark;
 }
@@ -61,7 +62,8 @@ button { font: inherit; color: inherit; }
 /* 앱 바 */
 .top { max-width: 1240px; margin: 0 auto; padding-block: 16px 14px; display: flex; align-items: center; gap: 8px; }
 .brand { display: flex; align-items: center; gap: 11px; margin-right: auto; min-width: 0; }
-.mark { width: 38px; height: 38px; border-radius: 11px; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-family: var(--font-mono); font-weight: 600; font-size: 15px; box-shadow: 0 6px 16px -6px var(--accent); flex: 0 0 auto; }
+.mark { width: 38px; height: 38px; flex: 0 0 auto; display: block; filter: drop-shadow(0 6px 10px color-mix(in srgb, var(--accent) 35%, transparent)); }
+.mark svg { display: block; }
 .brand b { display: block; font-family: var(--font-display); font-weight: 800; font-size: 19px; letter-spacing: -.02em; line-height: 1.2; }
 .brand small { display: block; color: var(--muted); font-size: 12px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .iconbtn { width: 38px; height: 38px; border-radius: 11px; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; cursor: pointer; color: var(--fg); transition: background .15s, border-color .15s; position: relative; }
@@ -107,7 +109,7 @@ a.iconbtn { text-decoration: none; }
 .mi .tag { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 999px; font-size: 10.5px; font-weight: 600; vertical-align: 1px; }
 .mi .tag.on { background: color-mix(in srgb, #16a34a 16%, transparent); color: #16a34a; }
 .mi .tag.off { background: color-mix(in srgb, var(--muted) 16%, transparent); color: var(--muted); }
-.book { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 12px; background: color-mix(in srgb, #5865f2 7%, var(--surface)); border: 1px solid color-mix(in srgb, #5865f2 22%, var(--line)); }
+.book { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 12px; background: color-mix(in srgb, var(--accent) 7%, var(--surface)); border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line)); }
 .book .bt { font-size: 13px; font-weight: 700; color: var(--fg); }
 .howto { font-size: 12.5px; color: var(--muted); }
 .howto summary { cursor: pointer; color: var(--accent); font-weight: 600; }
@@ -284,7 +286,7 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
 </style>
 
 </head><body><header class="top">
-  <div class="brand"><span class="mark" aria-hidden="true">**</span><div><b>디스코드 텍스트 공방</b><small>쓰는 그대로 보이는 디스코드 메시지 편집기</small></div></div>
+  <div class="brand"><span class="mark"><svg width="38" height="38" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="markg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b39cf0"/><stop offset="1" stop-color="#7a5bcf"/></linearGradient></defs><rect width="64" height="64" rx="15" fill="url(#markg)"/><path d="M21 9h22v15H21z" fill="#fff"/><rect x="25" y="13" width="14" height="2.6" rx="1.3" fill="#7a5bcf"/><rect x="25" y="18" width="9" height="2.6" rx="1.3" fill="#7a5bcf"/><path d="M12 26a6 6 0 0 1 6-6h28a6 6 0 0 1 6 6v18a6 6 0 0 1-6 6H30l-8 7v-7h-4a6 6 0 0 1-6-6z" fill="#fff"/><rect x="14" y="23" width="36" height="4" rx="2" fill="#2e1d66" opacity=".25"/><g fill="#7a5bcf"><ellipse cx="24" cy="36.5" rx="4.6" ry="5.4"/><ellipse cx="40" cy="36.5" rx="4.6" ry="5.4"/></g></svg></span><div><b>디스코드 텍스트 공방</b><small>쓰는 그대로 보이는 디스코드 메시지 편집기</small></div></div>
   <button class="iconbtn" id="modeBtn" aria-label="화면 모드"></button>
   <a class="iconbtn" id="contactBtn" href="https://x.com/Liberali_0" target="_blank" rel="noopener" aria-label="만든 사람에게 연락하기 (X)" title="만든 사람에게 연락하기 (X @Liberali_0)"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
   <button class="iconbtn" id="helpBtn" aria-label="사용법과 단축키" title="사용법과 단축키 (?)"></button>
