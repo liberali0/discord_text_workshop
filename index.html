@@ -62,6 +62,10 @@ button { font: inherit; color: inherit; }
 .brand b { display: block; font-family: var(--font-display); font-weight: 800; font-size: 19px; letter-spacing: -.02em; line-height: 1.2; }
 .brand small { display: block; color: var(--muted); font-size: 12px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .iconbtn { width: 38px; height: 38px; border-radius: 11px; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; cursor: pointer; color: var(--fg); transition: background .15s, border-color .15s; position: relative; }
+a.iconbtn { text-decoration: none; }
+.contact { margin: 16px 0 0; padding-top: 12px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+.contact a { color: var(--accent); font-weight: 600; text-decoration: none; }
+.contact a:hover { text-decoration: underline; }
 .iconbtn:hover { border-color: color-mix(in srgb, var(--accent) 50%, var(--line)); }
 .iconbtn .swatch { width: 18px; height: 18px; border-radius: 50%; background: var(--accent); box-shadow: inset 0 0 0 2px color-mix(in srgb, #fff 35%, transparent); }
 .pop { position: absolute; top: calc(100% + 8px); right: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow-pop); padding: 10px; z-index: 40; min-width: 200px; }
@@ -119,7 +123,7 @@ button { font: inherit; color: inherit; }
 .who time { font-weight: 400; font-size: 12px; color: var(--c-muted); margin-left: 6px; }
 #ed { min-height: 360px; outline: none; font-size: 15px; line-height: 1.6; overflow-wrap: anywhere; caret-color: var(--accent); counter-reset: ol; padding-top: 2px; }
 #ed ::selection { background: var(--c-sel); }
-#ed.is-empty > .blk:first-child::before { content: "여기에 쓴다. 줄 맨 앞에서 / 를 누르면 메뉴가 열린다"; color: var(--c-muted); position: absolute; pointer-events: none; white-space: nowrap; }
+#ed.is-empty > .blk:first-child::before { content: "여기에 씁니다. 줄 맨 앞에서 / 를 누르면 메뉴가 열립니다"; color: var(--c-muted); position: absolute; pointer-events: none; white-space: nowrap; }
 .blk { min-height: 1.6em; position: relative; }
 .blk[data-b="h1"] { font-size: 1.5em; font-weight: 700; line-height: 1.35; margin-top: 8px; }
 .blk[data-b="h2"] { font-size: 1.25em; font-weight: 700; line-height: 1.35; margin-top: 6px; }
@@ -264,6 +268,7 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
     <div class="pop" id="accentPop" hidden><p class="lbl">테마 색</p><div class="dots" id="accentDots"></div></div>
   </div>
   <button class="iconbtn" id="modeBtn" aria-label="화면 모드"></button>
+  <a class="iconbtn" id="contactBtn" href="https://x.com/Liberali_0" target="_blank" rel="noopener" aria-label="만든 사람에게 연락하기 (X)" title="만든 사람에게 연락하기 (X @Liberali_0)"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
   <button class="iconbtn" id="helpBtn" aria-label="사용법과 단축키" title="사용법과 단축키 (?)"></button>
 </header>
 
@@ -275,7 +280,7 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
     </div>
     <div class="stage">
       <div class="surface chat-dark" id="surface">
-        <div class="chan"><span class="hash" aria-hidden="true">#</span><b>미리보기</b><span class="sub">쓴 모습 그대로 디스코드에 보인다</span>
+        <div class="chan"><span class="hash" aria-hidden="true">#</span><b>미리보기</b><span class="sub">쓴 모습 그대로 디스코드에 보입니다</span>
           <span class="seg" id="chatSeg" role="group" aria-label="디스코드 화면"><button data-c="dark">다크</button><button data-c="light">라이트</button></span>
         </div>
         <div class="msgrow">
@@ -288,11 +293,11 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
       </div>
     </div>
     <div class="actionbar">
-      <div class="meter" id="meter" title="디스코드 한 메시지는 2,000자까지다">
+      <div class="meter" id="meter" title="디스코드 한 메시지는 2,000자까지입니다">
         <svg viewBox="0 0 22 22" aria-hidden="true"><circle class="trk" cx="11" cy="11" r="9" fill="none" stroke-width="3"/><circle class="val" id="meterVal" cx="11" cy="11" r="9" fill="none" stroke-width="3" stroke-linecap="round" stroke-dasharray="56.55" stroke-dashoffset="56.55"/></svg>
         <span id="count">0 / 2,000</span>
       </div>
-      <span class="chipwarn" id="ansiWarn" hidden>색 글자는 PC·웹에서만 보인다</span>
+      <span class="chipwarn" id="ansiWarn" hidden>색 글자는 PC·웹에서만 보입니다</span>
       <span class="spacer"></span>
       <button class="ib" id="undoBtn" aria-label="되돌리기" title="되돌리기 (Ctrl+Z)"></button>
       <button class="ib" id="redoBtn" aria-label="다시 실행" title="다시 실행 (Ctrl+Y)"></button>
@@ -306,23 +311,23 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
     <div class="side-h"><span id="sideIco"></span><b id="sideTitle"></b><button class="ib" id="sideClose" aria-label="패널 닫기" style="width:32px;height:32px"></button></div>
 
     <section class="panel" data-p="color" hidden>
-      <p class="hint">글자를 선택하고 색을 누른다.</p>
+      <p class="hint">글자를 선택하고 색을 누릅니다.</p>
       <div class="swset"><span class="field-l">글자색</span><div class="sws" id="fgSw"></div></div>
       <div class="swset"><span class="field-l">배경색</span><div class="sws" id="bgSw"></div></div>
       <div class="swset"><span class="field-l">빠른 스타일</span><div class="row" style="gap:6px" id="presets"></div></div>
-      <span class="field-l">꼭 알아 둘 것</span>
+      <span class="field-l">꼭 알아 두십시오</span>
       <ul class="rules">
-        <li class="info"><span class="m">i</span><span>색을 넣은 줄은 <b>코드블록(회색 상자)</b>이 된다.</span></li>
-        <li class="ok"><span class="m">✓</span><span>색 줄에서는 <b>굵게·밑줄</b>만 남는다.</span></li>
-        <li class="no"><span class="m">✕</span><span><b>기울임·취소선·스포일러</b>는 빠진다.</span></li>
-        <li class="warn"><span class="m">!</span><span>색은 <b>PC·웹 디스코드</b>에서만 보인다.</span></li>
-        <li class="warn"><span class="m">!</span><span><b>모바일 앱</b>에서는 색 없는 코드블록으로 보인다.</span></li>
+        <li class="info"><span class="m">i</span><span>색을 넣은 줄은 <b>코드블록(회색 상자)</b>이 됩니다.</span></li>
+        <li class="ok"><span class="m">✓</span><span>색 줄에서는 <b>굵게·밑줄</b>만 남습니다.</span></li>
+        <li class="no"><span class="m">✕</span><span><b>기울임·취소선·스포일러</b>는 빠집니다.</span></li>
+        <li class="warn"><span class="m">!</span><span>색은 <b>PC·웹 디스코드</b>에서만 보입니다.</span></li>
+        <li class="warn"><span class="m">!</span><span><b>모바일 앱</b>에서는 색 없는 코드블록으로 보입니다.</span></li>
       </ul>
     </section>
 
     <section class="panel" data-p="fonts" hidden>
-      <input type="text" id="fontInput" aria-label="바꿀 글자" placeholder="편집기에서 영문을 선택하면 여기 들어온다">
-      <p class="hint">선택한 글자가 그 글꼴로 바뀐다. 선택이 없으면 위 칸 글자를 커서 위치에 넣는다. 닉네임·채널 이름에도 쓸 수 있다.</p>
+      <input type="text" id="fontInput" aria-label="바꿀 글자" placeholder="편집기에서 영문을 선택하면 여기 들어옵니다">
+      <p class="hint">선택한 글자가 그 글꼴로 바뀝니다. 선택이 없으면 위 칸 글자를 커서 위치에 넣습니다. 닉네임·채널 이름에도 쓸 수 있습니다.</p>
       <div class="list" id="fontList"></div>
     </section>
 
@@ -330,14 +335,14 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
       <label class="field-l" for="linkUrl">주소</label>
       <div class="inline"><input type="url" id="linkUrl" placeholder="https://"><button class="btn sm" id="linkApply">적용</button></div>
       <button class="btn sm soft" id="linkRemove" style="align-self:flex-start">링크 해제</button>
-      <p class="hint">글자를 선택하고 주소를 넣으면 링크가 걸린다.</p>
+      <p class="hint">글자를 선택하고 주소를 넣으면 링크가 걸립니다.</p>
     </section>
 
     <section class="panel" data-p="time" hidden>
       <label class="field-l" for="tsInput">날짜와 시간</label>
       <input type="datetime-local" id="tsInput">
       <div class="row" style="gap:6px"><button class="chip" data-add="0">지금</button><button class="chip" data-add="3600">+1시간</button><button class="chip" data-add="86400">+1일</button><button class="chip" data-add="604800">+1주</button></div>
-      <p class="hint">보는 사람의 시간대로 바뀌어 보인다. 누르면 커서 위치에 들어간다.</p>
+      <p class="hint">보는 사람의 시간대로 바뀌어 보입니다. 누르면 커서 위치에 들어갑니다.</p>
       <div class="list" id="tsList"></div>
     </section>
 
@@ -347,7 +352,7 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
       </div>
       <div class="inline"><input type="text" id="mText" aria-label="태그할 이름" autocomplete="off"><button class="btn sm" id="mInsert">넣기</button></div>
       <div class="row" style="gap:6px"><button class="chip" data-quick="@everyone">@everyone</button><button class="chip" data-quick="@here">@here</button></div>
-      <p class="hint">이름을 쓰고 Enter를 누르면 태그가 들어간다. 디스코드에서 보내면 이름이 같은 대상이 태그된다. 숫자 ID를 넣으면 ID 코드로 바꾼다(봇·웹훅용).</p>
+      <p class="hint">이름을 쓰고 Enter를 누르면 태그가 들어갑니다. 디스코드에서 보내면 이름이 같은 대상이 태그됩니다. 숫자 ID를 넣으면 ID 코드로 바꿉니다(봇·웹훅용).</p>
     </section>
 
     <section class="panel" data-p="tpl" hidden>
@@ -356,7 +361,7 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
 
     <section class="panel" data-p="code" hidden>
       <textarea id="codeBox" spellcheck="false" aria-label="디스코드 코드"></textarea>
-      <p class="hint">편집기와 실시간으로 같이 바뀐다. 디스코드 메시지를 통째로 붙여 넣어도 된다. <code>␛</code>는 색 정보 표시다.</p>
+      <p class="hint">편집기와 실시간으로 같이 바뀝니다. 디스코드 메시지를 통째로 붙여 넣어도 됩니다. <code>␛</code>는 색 정보 표시입니다.</p>
     </section>
   </aside>
 </div>
@@ -371,13 +376,14 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
     <div class="panel">
       <h3>사용법</h3>
       <ol class="tips">
-        <li>그냥 쓰고, 꾸밀 글자를 드래그하면 미니 툴바가 뜬다.</li>
-        <li>줄 맨 앞에서 <span class="kbd">/</span>를 누르면 제목·목록·코드블록·타임스탬프 메뉴가 열린다.</li>
-        <li>다 쓰면 <b>디스코드용으로 복사</b>를 누르고 디스코드에 붙여 넣는다.</li>
-        <li>디스코드 메시지를 붙여 넣으면 서식이 살아난 채로 들어온다.</li>
+        <li>그냥 쓰고, 꾸밀 글자를 드래그하면 미니 툴바가 뜹니다.</li>
+        <li>줄 맨 앞에서 <span class="kbd">/</span>를 누르면 제목·목록·코드블록·타임스탬프 메뉴가 열립니다.</li>
+        <li>다 쓰면 <b>디스코드용으로 복사</b>를 누르고 디스코드에 붙여 넣습니다.</li>
+        <li>디스코드 메시지를 붙여 넣으면 서식이 살아난 채로 들어옵니다.</li>
       </ol>
       <h3>단축키 (Mac은 ⌘)</h3>
       <div class="keys" id="keys"></div>
+      <p class="contact">문의·제안은 <a href="https://x.com/Liberali_0" target="_blank" rel="noopener">X @Liberali_0</a>으로 보내 주십시오.</p>
     </div>
   </div>
 </div>
@@ -443,7 +449,7 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
   function setMode(m) {
     if (m === "system") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", m);
     const [, icon, label] = MODES.find((x) => x[0] === m);
-    $("modeBtn").innerHTML = ic(icon); $("modeBtn").title = label + " (누르면 바뀐다)"; $("modeBtn").setAttribute("aria-label", label);
+    $("modeBtn").innerHTML = ic(icon); $("modeBtn").title = label + " (누르면 바뀝니다)"; $("modeBtn").setAttribute("aria-label", label);
     store.set("mode", m);
   }
   $("modeBtn").addEventListener("click", () => { const cur = store.get("mode", "system"); const i = MODES.findIndex((x) => x[0] === cur); setMode(MODES[(i + 1) % 3][0]); });
@@ -677,8 +683,8 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
   const undoS = [], redoS = [];
   let lastSnap = 0;
   const snapshot = () => { undoS.push(ed.innerHTML); if (undoS.length > 200) undoS.shift(); redoS.length = 0; lastSnap = Date.now(); };
-  function undo() { if (!undoS.length) return toast("되돌릴 내용이 없다"); redoS.push(ed.innerHTML); ed.innerHTML = undoS.pop(); ed.focus(); caretEnd(); after(); }
-  function redo() { if (!redoS.length) return toast("다시 실행할 내용이 없다"); undoS.push(ed.innerHTML); ed.innerHTML = redoS.pop(); ed.focus(); caretEnd(); after(); }
+  function undo() { if (!undoS.length) return toast("되돌릴 내용이 없습니다"); redoS.push(ed.innerHTML); ed.innerHTML = undoS.pop(); ed.focus(); caretEnd(); after(); }
+  function redo() { if (!redoS.length) return toast("다시 실행할 내용이 없습니다"); undoS.push(ed.innerHTML); ed.innerHTML = redoS.pop(); ed.focus(); caretEnd(); after(); }
 
   /* ================= 정리 + 상태 ================= */
   function normalize() {
@@ -926,7 +932,7 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
     slashItems = SLASH.filter(([l, keys]) => !q || l.includes(q) || keys.toLowerCase().includes(q));
     if (!slashItems.length) return closeSlash();
     slashRange = r; slashIdx = Math.min(slashIdx, slashItems.length - 1);
-    sl.innerHTML = '<div class="hint" style="padding:4px 10px 6px;font-size:11px">' + (q ? "“" + esc(q) + "” 찾는 중" : "넣을 항목을 고른다") + "</div>";
+    sl.innerHTML = '<div class="hint" style="padding:4px 10px 6px;font-size:11px">' + (q ? "“" + esc(q) + "” 찾는 중" : "넣을 항목을 고르십시오") + "</div>";
     slashItems.forEach(([l, keys, badge], i) => {
       const it = document.createElement("button"); it.type = "button"; it.className = "mi"; it.setAttribute("role", "option"); it.setAttribute("aria-selected", String(i === slashIdx));
       it.innerHTML = '<span class="badge">' + badge + "</span><span>" + l + "</span>";
@@ -1009,19 +1015,19 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
   /* ================= 복사 ================= */
   function copyOut() {
     const md = serialize();
-    if (!md.trim()) return toast("복사할 내용이 없다");
+    if (!md.trim()) return toast("복사할 내용이 없습니다");
     const ok = () => {
-      const b = $("copyBtn"); b.classList.add("ok"); b.innerHTML = ic("check") + "<span>복사했다</span>";
+      const b = $("copyBtn"); b.classList.add("ok"); b.innerHTML = ic("check") + "<span>복사했습니다</span>";
       clearTimeout(copyOut.t); copyOut.t = setTimeout(() => { b.classList.remove("ok"); b.innerHTML = COPY_HTML; }, 1800);
-      toast("디스코드 입력창에 붙여 넣으면 된다");
+      toast("디스코드 입력창에 붙여 넣으면 됩니다");
     };
-    const fail = () => { openPanel("code", true); const cb = $("codeBox"); cb.value = md; cb.focus(); cb.select(); toast("자동 복사가 막혔다. 선택된 코드를 Ctrl+C로 복사한다"); };
+    const fail = () => { openPanel("code", true); const cb = $("codeBox"); cb.value = md; cb.focus(); cb.select(); toast("자동 복사가 막혔습니다. 선택된 코드를 Ctrl+C로 복사하십시오"); };
     try { navigator.clipboard.writeText(md).then(ok, fail); } catch (_) { fail(); }
   }
   $("copyBtn").addEventListener("click", copyOut);
   $("undoBtn").addEventListener("click", undo);
   $("redoBtn").addEventListener("click", redo);
-  $("clearBtn").addEventListener("click", () => { snapshot(); ed.innerHTML = blk("p", ""); ed.focus(); caretEnd(); after(); toast("새로 시작한다. 되돌리기로 복구할 수 있다"); });
+  $("clearBtn").addEventListener("click", () => { snapshot(); ed.innerHTML = blk("p", ""); ed.focus(); caretEnd(); after(); toast("새로 시작합니다. 되돌리기로 복구할 수 있습니다"); });
 
   /* ================= 도구 패널 ================= */
   const TOOLS = [["color", "색", "palette", "색 입히기"], ["fonts", "특수 글꼴", "font", "특수 글꼴"], ["link", "링크", "link", "링크 숨기기"], ["time", "타임스탬프", "clock", "타임스탬프"], ["mention", "멘션", "at", "멘션·태그"], ["tpl", "템플릿", "tpl", "템플릿"], ["code", "코드 보기", "braces", "디스코드 코드"]];
@@ -1056,7 +1062,7 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
   /* --- 색 --- */
   const FG = [[30, "회색"], [31, "빨강"], [32, "초록"], [33, "노랑"], [34, "파랑"], [35, "분홍"], [36, "청록"], [37, "흰색"]];
   const BG = [[40, "짙은 남색"], [41, "주황"], [42, "회색 1"], [43, "회색 2"], [44, "회색 3"], [45, "보라"], [46, "회색 4"], [47, "아이보리"]];
-  function needSel() { const r = restore(); if (r.collapsed) { toast("색을 입힐 글자를 먼저 선택한다"); return null; } return r; }
+  function needSel() { const r = restore(); if (r.collapsed) { toast("색을 입힐 글자를 먼저 선택하십시오"); return null; } return r; }
   function stripProp(prop) {
     const r = restore();
     [...ed.querySelectorAll("span[style]")].filter((el) => r.intersectsNode(el)).forEach((el) => { el.style.removeProperty(prop); if (!el.getAttribute("style")) el.removeAttribute("style"); });
@@ -1071,7 +1077,7 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
   const RAINBOW = [31, 33, 32, 36, 34, 35];
   function rainbow() {
     const r = needSel(); if (!r) return;
-    if (blocksIn(r).length > 1) return toast("무지개는 한 줄씩만 된다");
+    if (blocksIn(r).length > 1) return toast("무지개는 한 줄씩만 됩니다");
     let k = 0; const html = [...r.toString()].map((ch) => /\s/.test(ch) ? esc(ch) : '<span style="color:' + ANSI_FG[RAINBOW[k++ % 6]] + '"><b>' + esc(ch) + "</b></span>").join("");
     insertHTML(html);
   }
@@ -1130,7 +1136,7 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
       b.addEventListener("click", () => {
         const r = restore(), has = !r.collapsed;
         run(() => exec("insertText", convert(has ? r.toString() : src, fn, mode)));
-        toast(has ? "선택한 글자를 " + name + "로 바꿨다" : name + " 글자를 넣었다");
+        toast(has ? "선택한 글자를 " + name + "로 바꿨습니다" : name + " 글자를 넣었습니다");
       });
       list.appendChild(b);
     }
@@ -1140,12 +1146,12 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
   /* --- 링크 --- */
   function applyLink() {
     let url = $("linkUrl").value.trim();
-    if (!url) return toast("주소를 넣어야 한다");
+    if (!url) return toast("주소를 넣어 주십시오");
     if (!/^https?:\/\//.test(url)) url = "https://" + url;
     const r = restore();
     if (r.collapsed) insertHTML('<a href="' + esc(url) + '">' + esc(url) + "</a>&nbsp;");
     else run(() => exec("createLink", url));
-    toast("링크를 걸었다");
+    toast("링크를 걸었습니다");
   }
   $("linkApply").addEventListener("click", applyLink);
   $("linkUrl").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); applyLink(); } });
@@ -1162,8 +1168,8 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
     for (const [f, name, fn] of TS) {
       const code = "<t:" + unix + ":" + f + ">";
       const b = document.createElement("button"); b.type = "button"; b.className = "item";
-      b.innerHTML = '<span class="nm">' + name + '</span><span class="val">' + esc(fn(d)) + '<span class="code">' + esc(code) + '</span></span><span class="go">넣기</span>' + (f === "R" ? '<span class="tip">' + ic("clock") + '디스코드에서 실시간으로 바뀐다 (예: 3분 전 → 4분 전)</span>' : "");
-      b.addEventListener("click", () => { insertTok(tok(code, fn(d), "ts")); toast(name + " 타임스탬프를 넣었다"); });
+      b.innerHTML = '<span class="nm">' + name + '</span><span class="val">' + esc(fn(d)) + '<span class="code">' + esc(code) + '</span></span><span class="go">넣기</span>' + (f === "R" ? '<span class="tip">' + ic("clock") + '디스코드에서 실시간으로 바뀝니다 (예: 3분 전 → 4분 전)</span>' : "");
+      b.addEventListener("click", () => { insertTok(tok(code, fn(d), "ts")); toast(name + " 타임스탬프를 넣었습니다"); });
       list.appendChild(b);
     }
   }
@@ -1187,18 +1193,18 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
   setMType("user");
   function insertMention() {
     const v = $("mText").value.trim().replace(/^[@#:]+|:+$/g, "");
-    if (!v) { $("mText").focus(); return toast("태그할 " + MT[mType][0] + " 이름을 써야 한다"); }
+    if (!v) { $("mText").focus(); return toast("태그할 " + MT[mType][0] + " 이름을 써 주십시오"); }
     const [label, , byName, byId] = MT[mType];
     const isId = /^\d{15,21}$/.test(v) && byId;
     const raw = isId ? byId(v) : byName(v);
     const look = isId ? (mType === "channel" ? "# " : "@") + label + " (ID)" : byName(v);
     insertTok(tok(raw, look));
     $("mText").value = "";
-    toast(look + " 태그를 넣었다");
+    toast(look + " 태그를 넣었습니다");
   }
   $("mInsert").addEventListener("click", insertMention);
   $("mText").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); insertMention(); } });
-  document.querySelectorAll("[data-quick]").forEach((b) => b.addEventListener("click", () => { insertTok(tok(b.dataset.quick, b.dataset.quick)); toast(b.dataset.quick + " 태그를 넣었다"); }));
+  document.querySelectorAll("[data-quick]").forEach((b) => b.addEventListener("click", () => { insertTok(tok(b.dataset.quick, b.dataset.quick)); toast(b.dataset.quick + " 태그를 넣었습니다"); }));
 
   /* --- 템플릿 --- */
   const TEMPLATES = [
@@ -1215,7 +1221,7 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
     b.addEventListener("click", () => {
       snapshot();
       if (ed.children.length === 1 && isEmptyBlk(ed.firstElementChild)) ed.innerHTML = importMd(fn()); else ed.insertAdjacentHTML("beforeend", blk("p", "") + importMd(fn()));
-      ed.focus(); caretEnd(); after(); toast(name + " 템플릿을 넣었다");
+      ed.focus(); caretEnd(); after(); toast(name + " 템플릿을 넣었습니다");
     });
     $("tplList").appendChild(b);
   }
@@ -1239,7 +1245,7 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
 
   /* ================= 시작 ================= */
   try { document.execCommand("defaultParagraphSeparator", false, "div"); } catch (_) {}
-  const SAMPLE = "# 오늘의 공지\n**길드 레이드**는 __<t:" + nextHour() + ":t>__에 시작해요! (<t:" + nextHour() + ":R>)\n> 준비물: 물약, *버프 음식*\n- 집합 장소: `#레이드-대기실`\n- 보상: ||전설 무기 상자||\n```ansi\n" + ESC + "[0;1;31m지각하면" + ESC + "[0m " + ESC + "[0;1;4;33m입장 불가" + ESC + "[0m\n```\n-# 글자를 드래그하면 서식 툴바가 뜬다 · 줄 맨 앞에서 / 를 누르면 메뉴가 열린다";
+  const SAMPLE = "# 오늘의 공지\n**길드 레이드**는 __<t:" + nextHour() + ":t>__에 시작해요! (<t:" + nextHour() + ":R>)\n> 준비물: 물약, *버프 음식*\n- 집합 장소: `#레이드-대기실`\n- 보상: ||전설 무기 상자||\n```ansi\n" + ESC + "[0;1;31m지각하면" + ESC + "[0m " + ESC + "[0;1;4;33m입장 불가" + ESC + "[0m\n```\n-# 글자를 드래그하면 서식 툴바가 뜹니다 · 줄 맨 앞에서 / 를 누르면 메뉴가 열립니다";
   ed.innerHTML = importMd(store.get("draft2", null) ?? SAMPLE);
   after();
   $("now").textContent = "오늘 " + new Date().toLocaleTimeString("ko-KR", { hour: "numeric", minute: "2-digit" });
