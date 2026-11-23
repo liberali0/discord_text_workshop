@@ -67,12 +67,6 @@ a.iconbtn { text-decoration: none; }
 .contact a { color: var(--accent); font-weight: 600; text-decoration: none; }
 .contact a:hover { text-decoration: underline; }
 .iconbtn:hover { border-color: color-mix(in srgb, var(--accent) 50%, var(--line)); }
-.iconbtn .swatch { width: 18px; height: 18px; border-radius: 50%; background: var(--accent); box-shadow: inset 0 0 0 2px color-mix(in srgb, #fff 35%, transparent); }
-.pop { position: absolute; top: calc(100% + 8px); right: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow-pop); padding: 10px; z-index: 40; min-width: 200px; }
-.pop .lbl { font-size: 12px; color: var(--muted); margin: 0 0 8px; }
-.dots { display: grid; grid-template-columns: repeat(6, 26px); gap: 6px; }
-.dot { width: 26px; height: 26px; border-radius: 50%; border: 0; cursor: pointer; padding: 0; box-shadow: inset 0 0 0 2px color-mix(in srgb, #fff 30%, transparent); }
-.dot[aria-pressed="true"] { outline: 2px solid var(--fg); outline-offset: 2px; }
 
 /* 본문 레이아웃 */
 .layout { max-width: 1240px; margin: 0 auto; padding-bottom: 48px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
@@ -263,10 +257,6 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
 
 </head><body><header class="top">
   <div class="brand"><span class="mark" aria-hidden="true">**</span><div><b>디스코드 텍스트 공방</b><small>쓰는 그대로 보이는 디스코드 메시지 편집기</small></div></div>
-  <div style="position:relative">
-    <button class="iconbtn" id="accentBtn" aria-label="테마 색 고르기" aria-haspopup="true" aria-expanded="false" title="테마 색"><span class="swatch"></span></button>
-    <div class="pop" id="accentPop" hidden><p class="lbl">테마 색</p><div class="dots" id="accentDots"></div></div>
-  </div>
   <button class="iconbtn" id="modeBtn" aria-label="화면 모드"></button>
   <a class="iconbtn" id="contactBtn" href="https://x.com/Liberali_0" target="_blank" rel="noopener" aria-label="만든 사람에게 연락하기 (X)" title="만든 사람에게 연락하기 (X @Liberali_0)"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
   <button class="iconbtn" id="helpBtn" aria-label="사용법과 단축키" title="사용법과 단축키 (?)"></button>
@@ -432,19 +422,8 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
   };
   const ic = (n, cls = "ico") => '<svg class="' + cls + '" viewBox="0 0 24 24" aria-hidden="true">' + P[n] + "</svg>";
 
-  /* ================= 테마 ================= */
-  const ACCENTS = [["민트", "#10a38c", "#fff"], ["블루", "#3b7cf5", "#fff"], ["보라", "#7c5cf0", "#fff"], ["핑크", "#e44a93", "#fff"], ["코랄", "#ef6a4f", "#fff"], ["앰버", "#f2a516", "#1a1200"]];
-  function setAccent(i) {
-    const [, c, ink] = ACCENTS[i] || ACCENTS[0];
-    document.documentElement.style.setProperty("--accent", c); document.documentElement.style.setProperty("--accent-ink", ink);
-    document.querySelectorAll("#accentDots .dot").forEach((d, j) => d.setAttribute("aria-pressed", String(i === j)));
-    store.set("accent", i);
-  }
-  ACCENTS.forEach(([n, c], i) => { const b = document.createElement("button"); b.className = "dot"; b.style.background = c; b.title = n; b.setAttribute("aria-label", "테마 색 " + n); b.addEventListener("click", () => { setAccent(i); togglePop(false); }); $("accentDots").appendChild(b); });
-  setAccent(store.get("accent", 0));
-  const togglePop = (show) => { $("accentPop").hidden = !show; $("accentBtn").setAttribute("aria-expanded", String(show)); };
-  $("accentBtn").addEventListener("click", (e) => { e.stopPropagation(); togglePop($("accentPop").hidden); });
-  document.addEventListener("click", (e) => { if (!e.target.closest("#accentPop")) togglePop(false); });
+  /* ================= 화면 모드 ================= */
+  try { localStorage.removeItem("dfs:accent"); } catch (_) {}
   const MODES = [["system", "auto", "화면 모드: 기기 설정 따라가기"], ["light", "sun", "화면 모드: 라이트"], ["dark", "moon", "화면 모드: 다크"]];
   function setMode(m) {
     if (m === "system") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", m);
