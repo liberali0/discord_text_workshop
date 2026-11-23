@@ -1,0 +1,1249 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>디스코드 텍스트 공방</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gothic+A1:wght@500;700;800&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: 상단 앱 바 → [편집 카드(리본 툴바 · 디스코드 모양 편집면 · 하단 고정 바)] + [도구 옆 패널]. 좁으면 옆 패널이 하단 시트로 */
+:root {
+  --accent: #10a38c;
+  --accent-ink: #ffffff;
+  --bg: #eef1f4;
+  --surface: #ffffff;
+  --surface-2: #f2f4f7;
+  --surface-3: #e7ebef;
+  --fg: #141920;
+  --muted: #5d6874;
+  --line: #e0e5ea;
+  --shadow-sm: 0 1px 2px rgba(16, 24, 32, .06);
+  --shadow: 0 1px 2px rgba(16, 24, 32, .05), 0 12px 32px -8px rgba(16, 24, 32, .12);
+  --shadow-pop: 0 4px 12px rgba(16, 24, 32, .12), 0 20px 48px -12px rgba(16, 24, 32, .28);
+  --warn: #c98a00;
+  --danger: #d6453d;
+  --font-display: "Gothic A1", "IBM Plex Sans KR", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Consolas, monospace;
+  --r: 18px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c0f12; --surface: #15191d; --surface-2: #1c2126; --surface-3: #252b31; --fg: #e9edf0; --muted: #96a1ab; --line: #272e35;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.4); --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px -8px rgba(0,0,0,.5); --shadow-pop: 0 4px 12px rgba(0,0,0,.4), 0 20px 48px -12px rgba(0,0,0,.7);
+    --warn: #f0b429; --danger: #ff6b62; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0c0f12; --surface: #15191d; --surface-2: #1c2126; --surface-3: #252b31; --fg: #e9edf0; --muted: #96a1ab; --line: #272e35;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.4); --shadow: 0 1px 2px rgba(0,0,0,.3), 0 12px 32px -8px rgba(0,0,0,.5); --shadow-pop: 0 4px 12px rgba(0,0,0,.4), 0 20px 48px -12px rgba(0,0,0,.7);
+  --warn: #f0b429; --danger: #ff6b62; color-scheme: dark;
+}
+/* 편집면: 사이트 테마와 별개로 디스코드 다크/라이트 */
+.chat-dark { --c-bg: #313338; --c-head: #2b2d31; --c-fg: #dbdee1; --c-muted: #949ba4; --c-code: #2b2d31; --c-code-line: #1e1f22; --c-quote: #4e5058; --c-spoil: #1e1f22; --c-link: #00a8fc; --c-ansi: #b5bac1; --c-mention: rgba(88,101,242,.3); --c-mention-fg: #c9cdfb; --c-sel: rgba(0,168,252,.35); color-scheme: dark; }
+.chat-light { --c-bg: #ffffff; --c-head: #f2f3f5; --c-fg: #313338; --c-muted: #5c5e66; --c-code: #f2f3f5; --c-code-line: #e3e5e8; --c-quote: #c4c9ce; --c-spoil: #d4d7dc; --c-link: #006ce7; --c-ansi: #4e5058; --c-mention: rgba(88,101,242,.15); --c-mention-fg: #4752c4; --c-sel: rgba(0,108,231,.22); color-scheme: light; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { min-height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  -webkit-font-smoothing: antialiased;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
+button { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.ico { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: 0 0 auto; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+
+/* 앱 바 */
+.top { max-width: 1240px; margin: 0 auto; padding-block: 16px 14px; display: flex; align-items: center; gap: 8px; }
+.brand { display: flex; align-items: center; gap: 11px; margin-right: auto; min-width: 0; }
+.mark { width: 38px; height: 38px; border-radius: 11px; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-family: var(--font-mono); font-weight: 600; font-size: 15px; box-shadow: 0 6px 16px -6px var(--accent); flex: 0 0 auto; }
+.brand b { display: block; font-family: var(--font-display); font-weight: 800; font-size: 19px; letter-spacing: -.02em; line-height: 1.2; }
+.brand small { display: block; color: var(--muted); font-size: 12px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.iconbtn { width: 38px; height: 38px; border-radius: 11px; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; cursor: pointer; color: var(--fg); transition: background .15s, border-color .15s; position: relative; }
+.iconbtn:hover { border-color: color-mix(in srgb, var(--accent) 50%, var(--line)); }
+.iconbtn .swatch { width: 18px; height: 18px; border-radius: 50%; background: var(--accent); box-shadow: inset 0 0 0 2px color-mix(in srgb, #fff 35%, transparent); }
+.pop { position: absolute; top: calc(100% + 8px); right: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow-pop); padding: 10px; z-index: 40; min-width: 200px; }
+.pop .lbl { font-size: 12px; color: var(--muted); margin: 0 0 8px; }
+.dots { display: grid; grid-template-columns: repeat(6, 26px); gap: 6px; }
+.dot { width: 26px; height: 26px; border-radius: 50%; border: 0; cursor: pointer; padding: 0; box-shadow: inset 0 0 0 2px color-mix(in srgb, #fff 30%, transparent); }
+.dot[aria-pressed="true"] { outline: 2px solid var(--fg); outline-offset: 2px; }
+
+/* 본문 레이아웃 */
+.layout { max-width: 1240px; margin: 0 auto; padding-bottom: 48px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
+.layout.has-side { grid-template-columns: minmax(0, 1fr) 360px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); box-shadow: var(--shadow); min-width: 0; }
+
+/* 리본 */
+.ribbon { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: saturate(1.4) blur(10px); -webkit-backdrop-filter: saturate(1.4) blur(10px); border-bottom: 1px solid var(--line); border-radius: var(--r) var(--r) 0 0; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
+.rb-row { display: flex; align-items: center; gap: 2px; min-width: 0; }
+.rb-scroll { overflow-x: auto; scrollbar-width: none; flex-wrap: nowrap; }
+.rb-scroll::-webkit-scrollbar { display: none; }
+.sep { width: 1px; height: 22px; background: var(--line); margin: 0 6px; flex: 0 0 auto; }
+.tb { border: 0; background: none; border-radius: 9px; min-width: 34px; height: 34px; padding: 0 8px; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; color: var(--fg); flex: 0 0 auto; transition: background .12s; }
+.tb:hover { background: var(--surface-2); }
+.tb[aria-pressed="true"] { background: color-mix(in srgb, var(--accent) 16%, transparent); color: color-mix(in srgb, var(--accent) 70%, var(--fg)); }
+.tb .t { font-family: Georgia, "Times New Roman", serif; font-size: 16px; line-height: 1; width: 16px; text-align: center; }
+.blockbtn { min-width: 112px; justify-content: space-between; border: 1px solid var(--line); background: var(--surface); }
+.blockbtn .ico { width: 14px; height: 14px; color: var(--muted); }
+.tools { display: flex; gap: 4px; flex-wrap: wrap; }
+.tool { border: 1px solid transparent; background: var(--surface-2); border-radius: 10px; height: 34px; padding: 0 11px; display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 500; cursor: pointer; transition: background .12s, color .12s, border-color .12s; }
+.tool .ico { width: 16px; height: 16px; color: var(--muted); }
+.tool:hover { border-color: var(--line); background: var(--surface); }
+.tool[aria-expanded="true"] { background: var(--accent); color: var(--accent-ink); }
+.tool[aria-expanded="true"] .ico { color: var(--accent-ink); }
+.menu { position: absolute; z-index: 45; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow-pop); padding: 6px; min-width: 220px; display: flex; flex-direction: column; gap: 2px; }
+.mi { display: flex; align-items: center; gap: 10px; border: 0; background: none; padding: 7px 10px; border-radius: 9px; cursor: pointer; text-align: left; width: 100%; }
+.mi:hover, .mi[aria-selected="true"] { background: var(--surface-2); }
+.mi .k { margin-left: auto; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+.mi .badge { width: 30px; height: 30px; border-radius: 8px; background: var(--surface-2); display: grid; place-items: center; font-size: 12px; font-weight: 700; flex: 0 0 auto; border: 1px solid var(--line); }
+.mi[aria-selected="true"] .badge { background: var(--surface); }
+.mi .d { display: block; font-size: 11px; color: var(--muted); line-height: 1.3; }
+
+/* 편집면 */
+.stage { padding: 18px; }
+.surface { background: var(--c-bg); color: var(--c-fg); border-radius: 14px; overflow: hidden; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c-fg) 6%, transparent); }
+.chan { display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: var(--c-head); border-bottom: 1px solid color-mix(in srgb, var(--c-fg) 8%, transparent); font-size: 14px; }
+.chan .hash { color: var(--c-muted); font-size: 20px; line-height: 1; font-weight: 500; }
+.chan b { font-weight: 600; }
+.chan .sub { color: var(--c-muted); font-size: 12px; margin-left: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.chan .seg { margin-left: auto; }
+.seg { display: inline-flex; background: color-mix(in srgb, var(--c-fg, var(--fg)) 8%, transparent); border-radius: 999px; padding: 3px; gap: 2px; flex: 0 0 auto; }
+.seg button { border: 0; background: none; padding: 3px 10px; border-radius: 999px; font-size: 12px; cursor: pointer; color: var(--c-muted, var(--muted)); }
+.seg button[aria-pressed="true"] { background: var(--c-bg, var(--surface)); color: var(--c-fg, var(--fg)); box-shadow: 0 1px 2px rgba(0,0,0,.15); font-weight: 600; }
+.msgrow { display: flex; gap: 14px; padding: 18px 18px 26px; }
+.avatar { flex: 0 0 40px; height: 40px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-weight: 700; }
+.msg { flex: 1; min-width: 0; }
+.who { font-weight: 600; color: var(--accent); line-height: 1.4; }
+.who time { font-weight: 400; font-size: 12px; color: var(--c-muted); margin-left: 6px; }
+#ed { min-height: 360px; outline: none; font-size: 15px; line-height: 1.6; overflow-wrap: anywhere; caret-color: var(--accent); counter-reset: ol; padding-top: 2px; }
+#ed ::selection { background: var(--c-sel); }
+#ed.is-empty > .blk:first-child::before { content: "여기에 쓴다. 줄 맨 앞에서 / 를 누르면 메뉴가 열린다"; color: var(--c-muted); position: absolute; pointer-events: none; white-space: nowrap; }
+.blk { min-height: 1.6em; position: relative; }
+.blk[data-b="h1"] { font-size: 1.5em; font-weight: 700; line-height: 1.35; margin-top: 8px; }
+.blk[data-b="h2"] { font-size: 1.25em; font-weight: 700; line-height: 1.35; margin-top: 6px; }
+.blk[data-b="h3"] { font-size: 1.05em; font-weight: 700; margin-top: 4px; }
+.blk[data-b="sub"] { font-size: 12px; color: var(--c-muted); }
+.blk[data-b="quote"] { padding-left: 14px; box-shadow: inset 4px 0 0 var(--c-quote); }
+.blk[data-b="li"] { padding-left: 22px; }
+.blk[data-b="li"]::after { content: "•"; position: absolute; left: 8px; top: 0; }
+.blk:not([data-b="ol"]) { counter-reset: ol; }
+.blk[data-b="ol"] { counter-increment: ol; padding-left: 26px; }
+.blk[data-b="ol"]::after { content: counter(ol) "."; position: absolute; left: 4px; top: 0; font-variant-numeric: tabular-nums; }
+.blk[data-b="code"], .blk[data-ansi] { font-family: var(--font-mono); font-size: 13px; font-weight: 400; background: var(--c-code); padding: 0 12px; box-shadow: inset 1px 0 0 var(--c-code-line), inset -1px 0 0 var(--c-code-line); white-space: pre-wrap; line-height: 1.55; }
+.blk[data-ansi] { color: var(--c-ansi); }
+.blk[data-ansi]::after { content: none; }
+.blk[data-b="code"]:not([data-b="code"] + [data-b="code"]), .blk[data-ansi]:not([data-ansi] + [data-ansi]) { margin-top: 6px; padding-top: 8px; border-radius: 7px 7px 0 0; box-shadow: inset 1px 1px 0 var(--c-code-line), inset -1px 0 0 var(--c-code-line); }
+.blk[data-b="code"]:not(:has(+ [data-b="code"])), .blk[data-ansi]:not(:has(+ [data-ansi])) { margin-bottom: 6px; padding-bottom: 8px; border-radius: 0 0 7px 7px; box-shadow: inset 1px -1px 0 var(--c-code-line), inset -1px 0 0 var(--c-code-line); }
+.blk[data-b="code"]:not([data-b="code"] + [data-b="code"]):not(:has(+ [data-b="code"])), .blk[data-ansi]:not([data-ansi] + [data-ansi]):not(:has(+ [data-ansi])) { border-radius: 7px; box-shadow: inset 0 0 0 1px var(--c-code-line); }
+#ed code { font-family: var(--font-mono); font-size: .86em; background: var(--c-code); padding: 1px 5px; border-radius: 4px; }
+#ed a { color: var(--c-link); text-decoration: none; }
+#ed a:hover { text-decoration: underline; }
+#ed .spoiler { background: var(--c-spoil); border-radius: 3px; padding: 0 2px; box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--c-fg) 22%, transparent); }
+#ed .tok { background: var(--c-mention); color: var(--c-mention-fg); border-radius: 3px; padding: 0 2px; font-weight: 500; white-space: nowrap; cursor: default; }
+#ed .tok.ts { background: color-mix(in srgb, var(--c-fg) 10%, transparent); color: inherit; font-weight: 400; }
+
+/* 하단 고정 바 */
+.actionbar { position: sticky; bottom: 0; z-index: 15; display: flex; align-items: center; gap: 8px; padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0px)); background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--line); border-radius: 0 0 var(--r) var(--r); flex-wrap: wrap; }
+.meter { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.meter svg { width: 22px; height: 22px; transform: rotate(-90deg); }
+.meter .trk { stroke: var(--surface-3); }
+.meter .val { stroke: var(--accent); transition: stroke-dashoffset .25s; }
+.meter.warn .val { stroke: var(--warn); } .meter.over .val { stroke: var(--danger); } .meter.over { color: var(--danger); font-weight: 600; }
+.chipwarn { font-size: 12px; padding: 3px 10px; border-radius: 999px; background: color-mix(in srgb, var(--warn) 16%, transparent); color: color-mix(in srgb, var(--warn) 60%, var(--fg)); white-space: nowrap; }
+.spacer { flex: 1; }
+.btn { white-space: nowrap; flex-shrink: 0; border: 0; background: var(--accent); color: var(--accent-ink); border-radius: 11px; height: 40px; padding: 0 18px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: filter .15s, transform .1s; }
+.btn:hover { filter: brightness(1.07); }
+.btn:active { transform: scale(.98); }
+.btn.ok { background: #16a34a; color: #fff; }
+.btn.soft { background: var(--surface-2); color: var(--fg); font-weight: 500; }
+.btn.sm { height: 32px; padding: 0 12px; font-size: 13px; border-radius: 9px; }
+.ib { width: 38px; height: 38px; border-radius: 10px; border: 0; background: none; display: grid; place-items: center; cursor: pointer; color: var(--fg); }
+.ib:hover { background: var(--surface-2); }
+.ib:disabled { opacity: .35; cursor: default; background: none; }
+
+/* 옆 패널 / 하단 시트 */
+.side { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); max-height: calc(100vh - 24px); overflow: auto; padding: 0; display: flex; flex-direction: column; animation: slidein .2s ease-out; }
+@keyframes slidein { from { opacity: 0; transform: translateX(12px); } }
+.side-h { display: flex; align-items: center; gap: 10px; padding: 14px 14px 10px 16px; position: sticky; top: 0; background: var(--surface); z-index: 1; border-bottom: 1px solid var(--line); }
+.side-h .ico { color: var(--accent); }
+.side-h b { font-size: 15px; margin-right: auto; }
+.panel { padding: 14px 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+.grab { display: none; }
+@media (max-width: 980px) {
+  .layout.has-side { grid-template-columns: minmax(0, 1fr); }
+  .side { position: fixed; left: 0; right: 0; bottom: 0; top: auto; max-height: 64vh; border-radius: 20px 20px 0 0; z-index: 35; box-shadow: var(--shadow-pop); padding-bottom: env(safe-area-inset-bottom, 0px); animation: sheetin .22s ease-out; }
+  .side-h { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(14px, env(safe-area-inset-right, 0px)); border-radius: 20px 20px 0 0; }
+  .panel { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .grab { display: block; width: 40px; height: 4px; border-radius: 2px; background: var(--surface-3); margin: 8px auto 0; }
+  @keyframes sheetin { from { transform: translateY(30px); opacity: 0; } }
+}
+.hint { font-size: 13px; color: var(--muted); margin: 0; }
+.note { font-size: 13px; background: color-mix(in srgb, var(--accent) 9%, var(--surface)); border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent); border-radius: 12px; padding: 10px 12px; margin: 0; }
+.field-l { font-size: 12px; color: var(--muted); font-weight: 500; letter-spacing: .02em; }
+input[type="text"], input[type="url"], input[type="datetime-local"], textarea {
+  width: 100%; font: inherit; color: var(--fg); background: var(--surface-2); border: 1px solid transparent; border-radius: 11px; padding: 9px 12px; transition: border-color .15s, background .15s;
+}
+input:focus, textarea:focus { border-color: var(--accent); outline: none; background: var(--surface); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; resize: vertical; line-height: 1.55; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.swset { display: flex; flex-direction: column; gap: 6px; }
+.sws { display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 6px; }
+.sw { aspect-ratio: 1; max-width: 100%; border-radius: 9px; border: 1px solid color-mix(in srgb, var(--fg) 12%, transparent); cursor: pointer; padding: 0; transition: transform .1s; }
+.sw:hover { transform: translateY(-2px); }
+.sw.none { background: repeating-linear-gradient(45deg, var(--surface) 0 4px, var(--line) 4px 8px); }
+.chip { border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 12px; font-size: 13px; cursor: pointer; transition: border-color .12s; }
+.chip:hover { border-color: var(--accent); }
+.list { display: flex; flex-direction: column; gap: 4px; }
+.item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 2px 10px; align-items: center; padding: 9px 12px; border-radius: 11px; background: var(--surface-2); border: 1px solid transparent; cursor: pointer; text-align: left; width: 100%; transition: border-color .12s, background .12s; }
+.item:hover { border-color: var(--accent); background: var(--surface); }
+.item .nm { font-size: 13px; font-weight: 600; color: var(--fg); grid-column: 1; }
+.item .tip { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; margin-top: 6px; padding: 6px 9px; border-radius: 8px; font-size: 12px; font-weight: 500; background: color-mix(in srgb, var(--accent) 14%, transparent); color: color-mix(in srgb, var(--accent) 65%, var(--fg)); }
+.item .tip .ico { width: 14px; height: 14px; }
+.rules { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.rules li { display: flex; align-items: flex-start; gap: 10px; padding: 9px 12px; border-radius: 11px; font-size: 13.5px; font-weight: 500; line-height: 1.45; background: var(--surface-2); border: 1px solid var(--line); }
+.rules .m { flex: 0 0 22px; height: 22px; border-radius: 7px; display: grid; place-items: center; font-size: 12px; font-weight: 700; }
+.rules .ok .m { background: color-mix(in srgb, #16a34a 18%, transparent); color: #16a34a; }
+.rules .no .m { background: color-mix(in srgb, var(--danger) 16%, transparent); color: var(--danger); }
+.rules .warn .m { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--warn); }
+.rules .info .m { background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); }
+.rules b { font-weight: 700; }
+.item .val { overflow-wrap: anywhere; min-width: 0; grid-column: 1; font-size: 15px; }
+.item .code { display: block; font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+.item .go { grid-column: 2; grid-row: 1 / span 2; font-size: 12px; color: var(--accent); font-weight: 600; white-space: nowrap; opacity: 0; transition: opacity .12s; }
+.item:hover .go, .item:focus-visible .go { opacity: 1; }
+.segm { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); background: var(--surface-2); border-radius: 11px; padding: 3px; gap: 3px; }
+.segm button { border: 0; background: none; border-radius: 8px; padding: 6px 4px; font-size: 13px; cursor: pointer; color: var(--muted); }
+.segm button[aria-pressed="true"] { background: var(--surface); color: var(--fg); font-weight: 600; box-shadow: var(--shadow-sm); }
+.inline { display: flex; gap: 8px; }
+.inline input { flex: 1; min-width: 0; }
+
+/* 선택 시 미니 툴바 */
+.bubble { position: fixed; left: 0; top: 0; z-index: 50; display: flex; align-items: center; gap: 2px; padding: 4px; background: #17191c; color: #f1f3f5; border-radius: 12px; box-shadow: 0 10px 30px -6px rgba(0,0,0,.45); max-width: calc(100vw - 16px); overflow-x: auto; scrollbar-width: none; animation: pop .12s ease-out; }
+@keyframes pop { from { opacity: 0; transform: var(--tf) scale(.96); } }
+.bubble .tb { color: #f1f3f5; height: 32px; min-width: 32px; }
+.bubble .tb:hover { background: rgba(255,255,255,.1); }
+.bubble .tb[aria-pressed="true"] { background: rgba(255,255,255,.18); color: #fff; }
+.bubble .sep { background: rgba(255,255,255,.15); margin: 0 4px; }
+.bubble .cd { width: 18px; height: 18px; border-radius: 50%; border: 0; padding: 0; cursor: pointer; flex: 0 0 auto; margin: 0 2px; box-shadow: inset 0 0 0 1.5px rgba(255,255,255,.25); transition: transform .1s; }
+.bubble .cd:hover { transform: scale(1.18); }
+.bubble .cd.rb { background: conic-gradient(#dc322f, #b58900, #859900, #2aa198, #268bd2, #d33682, #dc322f); }
+.bubble .cd.none { background: repeating-linear-gradient(45deg, #444 0 3px, #777 3px 6px); }
+
+/* 도움말 */
+.overlay { position: fixed; inset: 0; z-index: 60; background: rgba(8, 10, 12, .45); display: grid; place-items: center; padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); animation: fade .15s; }
+@keyframes fade { from { opacity: 0; } }
+.dialog { background: var(--surface); border-radius: 20px; box-shadow: var(--shadow-pop); width: min(560px, 100%); max-height: 100%; overflow: auto; }
+.dialog .panel { gap: 16px; }
+.keys { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; font-size: 14px; }
+.keys .kk { display: flex; gap: 3px; justify-content: flex-end; }
+.kbd { font-family: var(--font-mono); font-size: 11px; border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 6px; padding: 1px 6px; background: var(--surface-2); white-space: nowrap; }
+.dialog h3 { margin: 0; font-size: 13px; color: var(--muted); font-weight: 600; letter-spacing: .03em; }
+.tips { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+
+.toast { position: fixed; left: 50%; bottom: calc(84px + env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 8px); background: var(--fg); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-weight: 500; font-size: 14px; opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; max-width: calc(100vw - 32px); text-align: center; z-index: 70; box-shadow: var(--shadow-pop); }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+@media (max-width: 640px) {
+  .brand small { display: none; }
+  .stage { padding: 10px; }
+  .msgrow { padding: 14px 12px 20px; gap: 10px; }
+  .avatar { flex-basis: 32px; height: 32px; font-size: 13px; }
+  .chan .sub { display: none; }
+  .tool span { display: none; }
+  .tool { padding: 0 10px; }
+  .actionbar .lbl-hide { display: none; }
+  #ed { min-height: 300px; }
+}
+</style>
+
+</head><body><header class="top">
+  <div class="brand"><span class="mark" aria-hidden="true">**</span><div><b>디스코드 텍스트 공방</b><small>쓰는 그대로 보이는 디스코드 메시지 편집기</small></div></div>
+  <div style="position:relative">
+    <button class="iconbtn" id="accentBtn" aria-label="테마 색 고르기" aria-haspopup="true" aria-expanded="false" title="테마 색"><span class="swatch"></span></button>
+    <div class="pop" id="accentPop" hidden><p class="lbl">테마 색</p><div class="dots" id="accentDots"></div></div>
+  </div>
+  <button class="iconbtn" id="modeBtn" aria-label="화면 모드"></button>
+  <button class="iconbtn" id="helpBtn" aria-label="사용법과 단축키" title="사용법과 단축키 (?)"></button>
+</header>
+
+<div class="layout" id="layout">
+  <main class="card" aria-label="편집기">
+    <div class="ribbon">
+      <div class="rb-row rb-scroll" id="fmtBar" role="toolbar" aria-label="서식"></div>
+      <div class="rb-row tools" role="toolbar" aria-label="도구" id="toolBar"></div>
+    </div>
+    <div class="stage">
+      <div class="surface chat-dark" id="surface">
+        <div class="chan"><span class="hash" aria-hidden="true">#</span><b>미리보기</b><span class="sub">쓴 모습 그대로 디스코드에 보인다</span>
+          <span class="seg" id="chatSeg" role="group" aria-label="디스코드 화면"><button data-c="dark">다크</button><button data-c="light">라이트</button></span>
+        </div>
+        <div class="msgrow">
+          <div class="avatar" aria-hidden="true">나</div>
+          <div class="msg">
+            <div class="who" aria-hidden="true">나 <time id="now"></time></div>
+            <div id="ed" contenteditable="true" spellcheck="false" role="textbox" aria-multiline="true" aria-label="메시지 편집기"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="actionbar">
+      <div class="meter" id="meter" title="디스코드 한 메시지는 2,000자까지다">
+        <svg viewBox="0 0 22 22" aria-hidden="true"><circle class="trk" cx="11" cy="11" r="9" fill="none" stroke-width="3"/><circle class="val" id="meterVal" cx="11" cy="11" r="9" fill="none" stroke-width="3" stroke-linecap="round" stroke-dasharray="56.55" stroke-dashoffset="56.55"/></svg>
+        <span id="count">0 / 2,000</span>
+      </div>
+      <span class="chipwarn" id="ansiWarn" hidden>색 글자는 PC·웹에서만 보인다</span>
+      <span class="spacer"></span>
+      <button class="ib" id="undoBtn" aria-label="되돌리기" title="되돌리기 (Ctrl+Z)"></button>
+      <button class="ib" id="redoBtn" aria-label="다시 실행" title="다시 실행 (Ctrl+Y)"></button>
+      <button class="ib" id="clearBtn" aria-label="새로 쓰기" title="새로 쓰기"></button>
+      <button class="btn" id="copyBtn"></button>
+    </div>
+  </main>
+
+  <aside class="card side" id="side" hidden aria-label="도구 패널">
+    <div class="grab" aria-hidden="true"></div>
+    <div class="side-h"><span id="sideIco"></span><b id="sideTitle"></b><button class="ib" id="sideClose" aria-label="패널 닫기" style="width:32px;height:32px"></button></div>
+
+    <section class="panel" data-p="color" hidden>
+      <p class="hint">글자를 선택하고 색을 누른다.</p>
+      <div class="swset"><span class="field-l">글자색</span><div class="sws" id="fgSw"></div></div>
+      <div class="swset"><span class="field-l">배경색</span><div class="sws" id="bgSw"></div></div>
+      <div class="swset"><span class="field-l">빠른 스타일</span><div class="row" style="gap:6px" id="presets"></div></div>
+      <span class="field-l">꼭 알아 둘 것</span>
+      <ul class="rules">
+        <li class="info"><span class="m">i</span><span>색을 넣은 줄은 <b>코드블록(회색 상자)</b>이 된다.</span></li>
+        <li class="ok"><span class="m">✓</span><span>색 줄에서는 <b>굵게·밑줄</b>만 남는다.</span></li>
+        <li class="no"><span class="m">✕</span><span><b>기울임·취소선·스포일러</b>는 빠진다.</span></li>
+        <li class="warn"><span class="m">!</span><span>색은 <b>PC·웹 디스코드</b>에서만 보인다.</span></li>
+        <li class="warn"><span class="m">!</span><span><b>모바일 앱</b>에서는 색 없는 코드블록으로 보인다.</span></li>
+      </ul>
+    </section>
+
+    <section class="panel" data-p="fonts" hidden>
+      <input type="text" id="fontInput" aria-label="바꿀 글자" placeholder="편집기에서 영문을 선택하면 여기 들어온다">
+      <p class="hint">선택한 글자가 그 글꼴로 바뀐다. 선택이 없으면 위 칸 글자를 커서 위치에 넣는다. 닉네임·채널 이름에도 쓸 수 있다.</p>
+      <div class="list" id="fontList"></div>
+    </section>
+
+    <section class="panel" data-p="link" hidden>
+      <label class="field-l" for="linkUrl">주소</label>
+      <div class="inline"><input type="url" id="linkUrl" placeholder="https://"><button class="btn sm" id="linkApply">적용</button></div>
+      <button class="btn sm soft" id="linkRemove" style="align-self:flex-start">링크 해제</button>
+      <p class="hint">글자를 선택하고 주소를 넣으면 링크가 걸린다.</p>
+    </section>
+
+    <section class="panel" data-p="time" hidden>
+      <label class="field-l" for="tsInput">날짜와 시간</label>
+      <input type="datetime-local" id="tsInput">
+      <div class="row" style="gap:6px"><button class="chip" data-add="0">지금</button><button class="chip" data-add="3600">+1시간</button><button class="chip" data-add="86400">+1일</button><button class="chip" data-add="604800">+1주</button></div>
+      <p class="hint">보는 사람의 시간대로 바뀌어 보인다. 누르면 커서 위치에 들어간다.</p>
+      <div class="list" id="tsList"></div>
+    </section>
+
+    <section class="panel" data-p="mention" hidden>
+      <div class="segm" id="mType" role="group" aria-label="태그 종류">
+        <button data-t="user" aria-pressed="true">@ 사용자</button><button data-t="role" aria-pressed="false">@ 역할</button><button data-t="channel" aria-pressed="false"># 채널</button><button data-t="emoji" aria-pressed="false">: 이모지</button>
+      </div>
+      <div class="inline"><input type="text" id="mText" aria-label="태그할 이름" autocomplete="off"><button class="btn sm" id="mInsert">넣기</button></div>
+      <div class="row" style="gap:6px"><button class="chip" data-quick="@everyone">@everyone</button><button class="chip" data-quick="@here">@here</button></div>
+      <p class="hint">이름을 쓰고 Enter를 누르면 태그가 들어간다. 디스코드에서 보내면 이름이 같은 대상이 태그된다. 숫자 ID를 넣으면 ID 코드로 바꾼다(봇·웹훅용).</p>
+    </section>
+
+    <section class="panel" data-p="tpl" hidden>
+      <div class="list" id="tplList"></div>
+    </section>
+
+    <section class="panel" data-p="code" hidden>
+      <textarea id="codeBox" spellcheck="false" aria-label="디스코드 코드"></textarea>
+      <p class="hint">편집기와 실시간으로 같이 바뀐다. 디스코드 메시지를 통째로 붙여 넣어도 된다. <code>␛</code>는 색 정보 표시다.</p>
+    </section>
+  </aside>
+</div>
+
+<div class="menu" id="blockMenu" role="listbox" aria-label="문단 스타일" hidden></div>
+<div class="menu" id="slash" role="listbox" aria-label="빠른 메뉴" hidden></div>
+<div class="bubble" id="bubble" role="toolbar" aria-label="선택한 글자 서식" hidden></div>
+
+<div class="overlay" id="help" hidden>
+  <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="side-h" style="border-radius:20px 20px 0 0"><b id="helpTitle">사용법과 단축키</b><button class="ib" id="helpClose" aria-label="닫기" style="width:32px;height:32px"></button></div>
+    <div class="panel">
+      <h3>사용법</h3>
+      <ol class="tips">
+        <li>그냥 쓰고, 꾸밀 글자를 드래그하면 미니 툴바가 뜬다.</li>
+        <li>줄 맨 앞에서 <span class="kbd">/</span>를 누르면 제목·목록·코드블록·타임스탬프 메뉴가 열린다.</li>
+        <li>다 쓰면 <b>디스코드용으로 복사</b>를 누르고 디스코드에 붙여 넣는다.</li>
+        <li>디스코드 메시지를 붙여 넣으면 서식이 살아난 채로 들어온다.</li>
+      </ol>
+      <h3>단축키 (Mac은 ⌘)</h3>
+      <div class="keys" id="keys"></div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const ed = $("ed");
+  const ESC = "\u001b", VIS = "\u241B";
+  const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem("dfs:" + k); return v === null ? d : JSON.parse(v); } catch (_) { return d; } },
+    set(k, v) { try { localStorage.setItem("dfs:" + k, JSON.stringify(v)); } catch (_) {} },
+  };
+  const toast = (msg) => { const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("show"), 1800); };
+  const pad = (n) => String(n).padStart(2, "0");
+
+  /* ================= 아이콘 ================= */
+  const P = {
+    undo: '<path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/>',
+    redo: '<path d="m15 14 5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h3"/>',
+    copy: '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/>',
+    check: '<path d="M20 6 9 17l-5-5"/>',
+    spoiler: '<path d="m3 3 18 18"/><path d="M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.1A10 10 0 0 1 12 5c5 0 9 4.5 10 7a13 13 0 0 1-2.7 3.9M6.6 6.6C4.4 8 2.8 10.1 2 12c1 2.5 5 7 10 7a10 10 0 0 0 5.4-1.6"/>',
+    code: '<path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/>',
+    quote: '<path d="M4 5v14"/><path d="M9 8h11M9 12h11M9 16h7"/>',
+    list: '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
+    ol: '<path d="M10 6h10M10 12h10M10 18h10"/><path d="M4 6h1v4M4 10h2"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/>',
+    block: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="m10 10-2 2 2 2M14 10l2 2-2 2"/>',
+    eraser: '<path d="m7 21-4.3-4.3a1 1 0 0 1 0-1.4l9.6-9.6a1 1 0 0 1 1.4 0l5.6 5.6a1 1 0 0 1 0 1.4L13 21"/><path d="M22 21H7"/><path d="m5 11 9 9"/>',
+    palette: '<circle cx="13.5" cy="6.5" r="1"/><circle cx="17.5" cy="10.5" r="1"/><circle cx="8.5" cy="7.5" r="1"/><circle cx="6.5" cy="12.5" r="1"/><path d="M12 2a10 10 0 0 0 0 20c.9 0 1.6-.7 1.6-1.7 0-.4-.2-.8-.4-1.1-.3-.3-.4-.7-.4-1.1a1.6 1.6 0 0 1 1.6-1.7h2c3 0 5.6-2.5 5.6-5.6C22 6 17.5 2 12 2z"/>',
+    font: '<path d="M4 7V4h16v3"/><path d="M9 20h6"/><path d="M12 4v16"/>',
+    link: '<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/>',
+    clock: '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+    at: '<circle cx="12" cy="12" r="4"/><path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-4 8"/>',
+    tpl: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/>',
+    braces: '<path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5a2 2 0 0 0 2 2h1"/><path d="M16 21h1a2 2 0 0 0 2-2v-5a2 2 0 0 1 2-2 2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+    moon: '<path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/>',
+    auto: '<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>',
+    help: '<circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+    x: '<path d="M18 6 6 18M6 6l12 12"/>',
+    down: '<path d="m6 9 6 6 6-6"/>',
+    newdoc: '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M12 18v-6M9 15h6"/>',
+  };
+  const ic = (n, cls = "ico") => '<svg class="' + cls + '" viewBox="0 0 24 24" aria-hidden="true">' + P[n] + "</svg>";
+
+  /* ================= 테마 ================= */
+  const ACCENTS = [["민트", "#10a38c", "#fff"], ["블루", "#3b7cf5", "#fff"], ["보라", "#7c5cf0", "#fff"], ["핑크", "#e44a93", "#fff"], ["코랄", "#ef6a4f", "#fff"], ["앰버", "#f2a516", "#1a1200"]];
+  function setAccent(i) {
+    const [, c, ink] = ACCENTS[i] || ACCENTS[0];
+    document.documentElement.style.setProperty("--accent", c); document.documentElement.style.setProperty("--accent-ink", ink);
+    document.querySelectorAll("#accentDots .dot").forEach((d, j) => d.setAttribute("aria-pressed", String(i === j)));
+    store.set("accent", i);
+  }
+  ACCENTS.forEach(([n, c], i) => { const b = document.createElement("button"); b.className = "dot"; b.style.background = c; b.title = n; b.setAttribute("aria-label", "테마 색 " + n); b.addEventListener("click", () => { setAccent(i); togglePop(false); }); $("accentDots").appendChild(b); });
+  setAccent(store.get("accent", 0));
+  const togglePop = (show) => { $("accentPop").hidden = !show; $("accentBtn").setAttribute("aria-expanded", String(show)); };
+  $("accentBtn").addEventListener("click", (e) => { e.stopPropagation(); togglePop($("accentPop").hidden); });
+  document.addEventListener("click", (e) => { if (!e.target.closest("#accentPop")) togglePop(false); });
+  const MODES = [["system", "auto", "화면 모드: 기기 설정 따라가기"], ["light", "sun", "화면 모드: 라이트"], ["dark", "moon", "화면 모드: 다크"]];
+  function setMode(m) {
+    if (m === "system") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", m);
+    const [, icon, label] = MODES.find((x) => x[0] === m);
+    $("modeBtn").innerHTML = ic(icon); $("modeBtn").title = label + " (누르면 바뀐다)"; $("modeBtn").setAttribute("aria-label", label);
+    store.set("mode", m);
+  }
+  $("modeBtn").addEventListener("click", () => { const cur = store.get("mode", "system"); const i = MODES.findIndex((x) => x[0] === cur); setMode(MODES[(i + 1) % 3][0]); });
+  setMode(store.get("mode", "system"));
+  function setChat(c) {
+    $("surface").classList.toggle("chat-dark", c === "dark"); $("surface").classList.toggle("chat-light", c === "light");
+    document.querySelectorAll("#chatSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.c === c))); store.set("chat", c);
+  }
+  document.querySelectorAll("#chatSeg button").forEach((b) => b.addEventListener("click", () => setChat(b.dataset.c)));
+  setChat(store.get("chat", "dark"));
+  $("helpBtn").innerHTML = ic("help"); $("helpClose").innerHTML = ic("x"); $("sideClose").innerHTML = ic("x");
+  $("undoBtn").innerHTML = ic("undo"); $("redoBtn").innerHTML = ic("redo"); $("clearBtn").innerHTML = ic("newdoc");
+  const COPY_HTML = ic("copy") + '<span>디스코드용으로 복사</span>';
+  $("copyBtn").innerHTML = COPY_HTML;
+
+  /* ================= 타임스탬프 표시 ================= */
+  const fmt = (d, o) => new Intl.DateTimeFormat("ko-KR", o).format(d);
+  function relative(d) {
+    const diff = (d - Date.now()) / 1000, rtf = new Intl.RelativeTimeFormat("ko", { numeric: "auto" });
+    for (const [u, s] of [["year", 31536000], ["month", 2592000], ["day", 86400], ["hour", 3600], ["minute", 60], ["second", 1]])
+      if (Math.abs(diff) >= s || u === "second") return rtf.format(Math.round(diff / s), u);
+  }
+  const TS = [
+    ["t", "짧은 시간", (d) => fmt(d, { hour: "numeric", minute: "2-digit" })],
+    ["T", "긴 시간", (d) => fmt(d, { hour: "numeric", minute: "2-digit", second: "2-digit" })],
+    ["d", "짧은 날짜", (d) => fmt(d, { year: "numeric", month: "2-digit", day: "2-digit" })],
+    ["D", "긴 날짜", (d) => fmt(d, { year: "numeric", month: "long", day: "numeric" })],
+    ["f", "날짜+시간", (d) => fmt(d, { year: "numeric", month: "long", day: "numeric", hour: "numeric", minute: "2-digit" })],
+    ["F", "요일+날짜+시간", (d) => fmt(d, { year: "numeric", month: "long", day: "numeric", weekday: "long", hour: "numeric", minute: "2-digit" })],
+    ["R", "상대 시간", relative],
+  ];
+  const tsText = (unix, f) => (TS.find((x) => x[0] === f) || TS[4])[2](new Date(unix * 1000));
+  const tok = (raw, label, cls = "") => '<span class="tok ' + cls + '" contenteditable="false" data-raw="' + esc(raw) + '">' + esc(label) + "</span>";
+
+  /* ================= ANSI 색표 ================= */
+  const ANSI_FG = { 30: "#4f545c", 31: "#dc322f", 32: "#859900", 33: "#b58900", 34: "#268bd2", 35: "#d33682", 36: "#2aa198", 37: "#ffffff" };
+  const ANSI_BG = { 40: "#002b36", 41: "#cb4b16", 42: "#586e75", 43: "#657b83", 44: "#839496", 45: "#6c71c4", 46: "#93a1a1", 47: "#fdf6e3" };
+  const rgb = (h) => "rgb(" + parseInt(h.slice(1, 3), 16) + ", " + parseInt(h.slice(3, 5), 16) + ", " + parseInt(h.slice(5, 7), 16) + ")";
+  const FG_BY = {}, BG_BY = {};
+  for (const [k, h] of Object.entries(ANSI_FG)) { FG_BY[rgb(h)] = +k; FG_BY[h] = +k; }
+  for (const [k, h] of Object.entries(ANSI_BG)) { BG_BY[rgb(h)] = +k; BG_BY[h] = +k; }
+
+  /* ================= 디스코드 코드 → 편집기 ================= */
+  function inlineEd(text) {
+    const slots = [];
+    const keep = (html) => "\u0000" + (slots.push(html) - 1) + "\u0000";
+    let s = esc(text);
+    s = s.replace(/\\([*_~|`>#\\-])/g, (_, c) => keep(c));
+    s = s.replace(/`([^`\n]+)`/g, (_, c) => keep("<code>" + c + "</code>"));
+    s = s.replace(/&lt;t:(-?\d+)(?::([tTdDfFR]))?&gt;/g, (m, u, f) => keep(tok("<t:" + u + (f ? ":" + f : "") + ">", tsText(+u, f || "f"), "ts")));
+    s = s.replace(/&lt;@!?(\d+)&gt;/g, (m, id) => keep(tok("<@" + id + ">", "@사용자 (ID)")));
+    s = s.replace(/&lt;@&amp;(\d+)&gt;/g, (m, id) => keep(tok("<@&" + id + ">", "@역할 (ID)")));
+    s = s.replace(/&lt;#(\d+)&gt;/g, (m, id) => keep(tok("<#" + id + ">", "# 채널 (ID)")));
+    s = s.replace(/&lt;\/([\w-]+):(\d+)&gt;/g, (m, n, id) => keep(tok("</" + n + ":" + id + ">", "/" + n)));
+    s = s.replace(/&lt;(a?):(\w+):(\d+)&gt;/g, (m, a, n, id) => keep(tok("<" + a + ":" + n + ":" + id + ">", ":" + n + ":")));
+    s = s.replace(/@(everyone|here)\b/g, (m, n) => keep(tok("@" + n, "@" + n)));
+    s = s.replace(/\[([^\]\n]+)\]\((https?:\/\/[^\s)]+)\)/g, (_, t, u) => keep('<a href="' + u + '">' + t + "</a>"));
+    s = s.replace(/(https?:\/\/[^\s<]+)/g, (u) => keep(u));
+    s = s.replace(/\|\|(.+?)\|\|/g, '<span class="spoiler">$1</span>');
+    s = s.replace(/\*\*\*(.+?)\*\*\*/g, "<b><i>$1</i></b>");
+    s = s.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+    s = s.replace(/__(.+?)__/g, "<u>$1</u>");
+    s = s.replace(/\*(?!\s)(.+?)\*/g, "<i>$1</i>");
+    s = s.replace(/(^|[^\w])_(?!\s)(.+?)_(?!\w)/g, "$1<i>$2</i>");
+    s = s.replace(/~~(.+?)~~/g, "<s>$1</s>");
+    return s.replace(/\u0000(\d+)\u0000/g, (_, i) => slots[i]).replace(/\u0000(\d+)\u0000/g, (_, i) => slots[i]);
+  }
+  function ansiLinesHtml(body) {
+    let st = { fg: 0, bg: 0, b: false, u: false };
+    return body.split("\n").map((line) => {
+      let out = "";
+      for (const piece of line.split(/(\u001b\[[\d;]*m)/)) {
+        const m = piece.match(/^\u001b\[([\d;]*)m$/);
+        if (m) { for (const c of (m[1] || "0").split(";").map(Number)) { if (c === 0) st = { fg: 0, bg: 0, b: false, u: false }; else if (c === 1) st.b = true; else if (c === 4) st.u = true; else if (ANSI_FG[c]) st.fg = c; else if (ANSI_BG[c]) st.bg = c; } continue; }
+        if (!piece) continue;
+        let h = esc(piece);
+        if (st.u) h = "<u>" + h + "</u>";
+        if (st.b) h = "<b>" + h + "</b>";
+        if (st.fg || st.bg) h = '<span style="' + (st.fg ? "color:" + ANSI_FG[st.fg] + ";" : "") + (st.bg ? "background-color:" + ANSI_BG[st.bg] + ";" : "") + '">' + h + "</span>";
+        out += h;
+      }
+      return out;
+    });
+  }
+  const blk = (type, html, extra = "") => '<div class="blk" data-b="' + type + '"' + extra + ">" + (html || "<br>") + "</div>";
+  function importMd(md) {
+    md = md.split(VIS).join(ESC).replace(/\r\n?/g, "\n");
+    const out = [];
+    for (const part of md.split(/(```[\s\S]*?```)/g)) {
+      if (part.startsWith("```") && part.endsWith("```") && part.length >= 6) {
+        let body = part.slice(3, -3), lang = "";
+        const nl = body.indexOf("\n");
+        if (nl !== -1 && /^[\w+-]*$/.test(body.slice(0, nl))) { lang = body.slice(0, nl); body = body.slice(nl + 1); }
+        body = body.replace(/\n$/, "");
+        if (lang === "ansi") ansiLinesHtml(body).forEach((h) => out.push(blk("p", h, ' data-keep="1"')));
+        else body.split("\n").forEach((l) => out.push(blk("code", esc(l))));
+        continue;
+      }
+      const text = part.replace(/^\n/, "").replace(/\n$/, "");
+      if (!part || (!text && part.length <= 2 && out.length)) continue;
+      let quoteAll = false;
+      for (let line of text.split("\n")) {
+        let type = "p", m;
+        if (line.startsWith(">>> ")) { quoteAll = true; line = line.slice(4); }
+        else if (line.startsWith("> ")) { type = "quote"; line = line.slice(2); }
+        if (quoteAll) type = "quote";
+        if ((m = line.match(/^(#{1,3}) (.+)/))) { type = "h" + m[1].length; line = m[2]; }
+        else if ((m = line.match(/^-# (.+)/))) { type = "sub"; line = m[1]; }
+        else if ((m = line.match(/^\s*[-*] (.+)/))) { type = "li"; line = m[1]; }
+        else if ((m = line.match(/^\s*\d+\. (.+)/))) { type = "ol"; line = m[1]; }
+        out.push(blk(type, inlineEd(line)));
+      }
+    }
+    return out.join("") || blk("p", "");
+  }
+
+  /* ================= 편집기 → 디스코드 코드 ================= */
+  function collect(node, f, out) {
+    for (const n of node.childNodes) {
+      if (n.nodeType === 3) { out.push({ t: n.nodeValue.replace(/\u00a0/g, " ").replace(/\u200b/g, ""), f: { ...f } }); continue; }
+      if (n.nodeType !== 1) continue;
+      if (n.classList.contains("tok")) { out.push({ raw: n.dataset.raw, f: { ...f } }); continue; }
+      if (n.tagName === "BR") continue;
+      const g = { ...f }, tag = n.tagName, st = n.style;
+      if (tag === "B" || tag === "STRONG") g.b = 1;
+      if (tag === "I" || tag === "EM") g.i = 1;
+      if (tag === "U") g.u = 1;
+      if (tag === "S" || tag === "STRIKE" || tag === "DEL") g.s = 1;
+      if (tag === "CODE") g.code = 1;
+      if (tag === "A") g.a = n.getAttribute("href") || "";
+      if (n.classList.contains("spoiler")) g.sp = 1;
+      if (st) {
+        if (st.fontWeight === "bold" || +st.fontWeight >= 600) g.b = 1;
+        if (st.fontStyle === "italic") g.i = 1;
+        const td = st.textDecorationLine || st.textDecoration || "";
+        if (td.includes("underline")) g.u = 1;
+        if (td.includes("line-through")) g.s = 1;
+        if (st.color) g.fg = FG_BY[st.color] || 0;
+        if (st.backgroundColor) g.bg = BG_BY[st.backgroundColor] || 0;
+      }
+      if (tag === "FONT" && n.getAttribute("color")) g.fg = FG_BY[n.getAttribute("color").toLowerCase()] || 0;
+      collect(n, g, out);
+    }
+    return out;
+  }
+  const runsOf = (b) => collect(b, {}, []);
+  const hasColor = (b) => runsOf(b).some((r) => (r.f.fg || r.f.bg) && (r.raw || r.t.trim()));
+  const isAnsi = (b) => b.dataset.keep === "1" || hasColor(b);
+  const ORDER = ["a", "sp", "u", "s", "b", "i", "code"];
+  const MARK = { sp: "||", u: "__", s: "~~", b: "**", i: "*", code: "`" };
+  const escText = (t) => t.split(/(https?:\/\/\S+|:[\w~]+:)/).map((p, i) => (i % 2 ? p : p.replace(/([\\*_~|`])/g, "\\$1"))).join("");
+  function mdInline(runs, dropB) {
+    let out = "", stack = [], pend = "";
+    const keysOf = (f) => ORDER.filter((k) => (k === "a" ? f.a : f[k]) && !(dropB && k === "b")).map((k) => (k === "a" ? "a:" + f.a : k));
+    const open = (k) => (k.startsWith("a:") ? "[" : MARK[k]);
+    const close = (k) => (k.startsWith("a:") ? "](" + k.slice(2) + ")" : MARK[k]);
+    for (const r of runs) {
+      const text = r.raw != null ? r.raw : r.f.code ? r.t.replace(/`/g, "ˋ") : escText(r.t);
+      if (!text) continue;
+      const m = r.raw != null ? ["", "", text, ""] : text.match(/^(\s*)([\s\S]*?)(\s*)$/);
+      const [, lead, core, trail] = m;
+      if (!core) { pend += text; continue; }
+      const T = keysOf(r.f);
+      let closes = "", opens = "";
+      while (stack.some((k) => !T.includes(k))) closes += close(stack.pop());
+      for (const k of T) if (!stack.includes(k)) { opens += open(k); stack.push(k); }
+      out += closes + pend + lead + opens + core; pend = trail;
+    }
+    while (stack.length) out += close(stack.pop());
+    return out + pend;
+  }
+  function ansiLine(runs) {
+    let out = "", cur = "0";
+    for (const r of runs) {
+      const text = r.raw != null ? r.raw : r.t;
+      if (!text) continue;
+      const c = [0]; if (r.f.b) c.push(1); if (r.f.u) c.push(4); if (r.f.fg) c.push(r.f.fg); if (r.f.bg) c.push(r.f.bg);
+      const code = c.join(";");
+      if (code !== cur && (text.trim() || r.f.bg || r.f.u)) { out += ESC + "[" + code + "m"; cur = code; }
+      out += text;
+    }
+    return out + (cur !== "0" ? ESC + "[0m" : "");
+  }
+  function serialize() {
+    const blocks = [...ed.children], lines = [];
+    let olN = 0;
+    for (let i = 0; i < blocks.length; i++) {
+      const b = blocks[i], type = b.dataset.b || "p";
+      if (isAnsi(b)) {
+        lines.push("```ansi");
+        while (i < blocks.length && isAnsi(blocks[i])) { lines.push(ansiLine(runsOf(blocks[i]))); i++; }
+        i--; lines.push("```"); olN = 0; continue;
+      }
+      if (type === "code") {
+        lines.push("```");
+        while (i < blocks.length && blocks[i].dataset.b === "code" && !isAnsi(blocks[i])) { lines.push(blocks[i].textContent.replace(/\u00a0/g, " ")); i++; }
+        i--; lines.push("```"); olN = 0; continue;
+      }
+      olN = type === "ol" ? olN + 1 : 0;
+      let body = mdInline(runsOf(b), /^h\d$/.test(type));
+      if (type === "p") body = body.replace(/^(#{1,3} |-# |>{1,3} |[-*] )/, "\\$1").replace(/^(\d+)\. /, "$1\\. ");
+      const pre = { p: "", h1: "# ", h2: "## ", h3: "### ", sub: "-# ", quote: "> ", li: "- ", ol: olN + ". " }[type] ?? "";
+      lines.push(body.trim() ? pre + body : (type === "p" ? "" : pre + body));
+    }
+    return lines.join("\n").replace(/^\n+|\n+$/g, "");
+  }
+
+  /* ================= 선택 영역 ================= */
+  let saved = null;
+  const inEd = (node) => node && (node === ed || ed.contains(node));
+  function restore() {
+    const s = getSelection();
+    if (s.rangeCount && inEd(s.anchorNode) && document.activeElement === ed) return s.getRangeAt(0);
+    ed.focus({ preventScroll: true });
+    if (!saved || !inEd(saved.startContainer)) { saved = document.createRange(); saved.selectNodeContents(ed.lastElementChild || ed); saved.collapse(false); }
+    if (saved.startContainer === ed) {
+      const b = ed.children[Math.max(0, saved.startOffset - 1)] || ed.lastElementChild;
+      saved = document.createRange(); saved.selectNodeContents(b); saved.collapse(false);
+    }
+    s.removeAllRanges(); s.addRange(saved);
+    return s.getRangeAt(0);
+  }
+  const blockOf = (node) => { while (node && node !== ed) { if (node.parentNode === ed) return node; node = node.parentNode; } return null; };
+  const curBlock = () => { const s = getSelection(); return s.rangeCount ? blockOf(s.anchorNode) : null; };
+  const blocksIn = (r) => { const list = [...ed.children].filter((b) => r.intersectsNode(b)); return list.length ? list : [blockOf(r.startContainer)].filter(Boolean); };
+  const isEmptyBlk = (b) => !b.textContent.replace(/[\u200b\s\u00a0]/g, "") && !b.querySelector(".tok");
+  function caretIn(b, end) { const r = document.createRange(); r.selectNodeContents(b); r.collapse(!end); getSelection().removeAllRanges(); getSelection().addRange(r); }
+  function caretEnd() { caretIn(ed.lastElementChild || ed, true); }
+
+  /* ================= 되돌리기 ================= */
+  const undoS = [], redoS = [];
+  let lastSnap = 0;
+  const snapshot = () => { undoS.push(ed.innerHTML); if (undoS.length > 200) undoS.shift(); redoS.length = 0; lastSnap = Date.now(); };
+  function undo() { if (!undoS.length) return toast("되돌릴 내용이 없다"); redoS.push(ed.innerHTML); ed.innerHTML = undoS.pop(); ed.focus(); caretEnd(); after(); }
+  function redo() { if (!redoS.length) return toast("다시 실행할 내용이 없다"); undoS.push(ed.innerHTML); ed.innerHTML = redoS.pop(); ed.focus(); caretEnd(); after(); }
+
+  /* ================= 정리 + 상태 ================= */
+  function normalize() {
+    const s = getSelection(), an = s.anchorNode, ao = s.anchorOffset;
+    let moved = false, wrap = null;
+    for (const n of [...ed.childNodes]) {
+      if (n.nodeType === 1 && n.tagName === "DIV") { if (!n.classList.contains("blk")) n.className = "blk"; if (!n.dataset.b) n.dataset.b = "p"; wrap = null; continue; }
+      if (n.nodeType === 1 && n.tagName === "BR" && ed.childNodes.length > 1) { n.remove(); continue; }
+      if (!wrap) { wrap = document.createElement("div"); wrap.className = "blk"; wrap.dataset.b = "p"; ed.insertBefore(wrap, n); }
+      wrap.appendChild(n); moved = true;
+    }
+    if (!ed.firstElementChild) { ed.innerHTML = blk("p", ""); moved = true; }
+    ed.querySelectorAll("span[style], font").forEach((el) => {
+      if (el.tagName === "FONT") { const sp = document.createElement("span"); const c = el.getAttribute("color"); if (c) sp.style.color = c; sp.append(...el.childNodes); el.replaceWith(sp); return; }
+      const c = el.style.color, bgc = el.style.backgroundColor;
+      el.removeAttribute("style");
+      if (c && FG_BY[c]) el.style.color = c;
+      if (bgc && BG_BY[bgc]) el.style.backgroundColor = bgc;
+      if (!el.getAttribute("style") && !el.className) el.replaceWith(...el.childNodes);
+    });
+    if (moved && an && inEd(an)) { try { s.collapse(an, ao); } catch (_) {} }
+  }
+  function classify() { let any = false; for (const b of ed.children) { if (isAnsi(b)) { b.setAttribute("data-ansi", ""); any = true; } else b.removeAttribute("data-ansi"); } $("ansiWarn").hidden = !any; }
+  let saveT;
+  function after() {
+    normalize(); classify();
+    const md = serialize(), n = [...md].length;
+    $("count").textContent = n.toLocaleString() + " / 2,000";
+    $("meterVal").style.strokeDashoffset = String(56.55 * (1 - Math.min(1, n / 2000)));
+    $("meter").classList.toggle("warn", n > 1800 && n <= 2000); $("meter").classList.toggle("over", n > 2000);
+    ed.classList.toggle("is-empty", ed.children.length === 1 && isEmptyBlk(ed.firstElementChild));
+    if (!$("side").hidden && curPanel === "code" && document.activeElement !== $("codeBox")) $("codeBox").value = md.split(ESC).join(VIS);
+    $("undoBtn").disabled = !undoS.length; $("redoBtn").disabled = !redoS.length;
+    clearTimeout(saveT); saveT = setTimeout(() => store.set("draft2", md), 300);
+    refreshState();
+  }
+  function run(fn) { restore(); snapshot(); fn(); after(); }
+
+  /* ================= 서식 명령 ================= */
+  const exec = (c, v = null, css = false) => { document.execCommand("styleWithCSS", false, css); document.execCommand(c, false, v); };
+  function wrapClass(tag, cls, ph) {
+    const r = restore();
+    const anc = (n) => { while (n && n !== ed) { if (n.nodeType === 1 && n.tagName === tag && (!cls || n.classList.contains(cls))) return n; n = n.parentNode; } return null; };
+    const hit = anc(r.startContainer) || anc(r.endContainer);
+    if (hit) {
+      const sel = cls ? "." + cls : tag.toLowerCase();
+      [...ed.querySelectorAll(sel)].filter((el) => r.intersectsNode(el)).forEach((el) => el.replaceWith(...el.childNodes));
+      return;
+    }
+    if (r.collapsed) {
+      const el = document.createElement(tag); if (cls) el.className = cls; el.textContent = ph;
+      r.insertNode(el); const nr = document.createRange(); nr.selectNodeContents(el); getSelection().removeAllRanges(); getSelection().addRange(nr); return;
+    }
+    const blocks = blocksIn(r), sr = r.cloneRange(), last = [];
+    for (const b of blocks) {
+      const br = document.createRange(); br.selectNodeContents(b);
+      if (b.contains(sr.startContainer)) br.setStart(sr.startContainer, sr.startOffset);
+      if (b.contains(sr.endContainer)) br.setEnd(sr.endContainer, sr.endOffset);
+      if (br.collapsed || !br.toString()) continue;
+      const frag = br.extractContents();
+      frag.querySelectorAll(cls ? "." + cls : tag).forEach((el) => el.replaceWith(...el.childNodes));
+      const el = document.createElement(tag); if (cls) el.className = cls; el.appendChild(frag);
+      br.insertNode(el); last.push(el);
+    }
+    if (last.length) { const nr = document.createRange(); nr.setStartBefore(last[0]); nr.setEndAfter(last[last.length - 1]); getSelection().removeAllRanges(); getSelection().addRange(nr); }
+  }
+  function setBlock(type, force) {
+    const r = restore(), blocks = blocksIn(r);
+    const all = !force && blocks.every((b) => b.dataset.b === type && !isAnsi(b));
+    for (const b of blocks) {
+      if (b.dataset.keep) delete b.dataset.keep;
+      b.dataset.b = all ? "p" : type;
+      if (!all && type === "code") { b.querySelectorAll(".tok").forEach((t) => t.replaceWith(t.dataset.raw)); b.textContent = b.textContent; if (!b.textContent) b.innerHTML = "<br>"; }
+      if (!all && type !== "code") b.querySelectorAll("span[style]").forEach((s) => s.removeAttribute("style"));
+    }
+  }
+  function clearFormat() {
+    const r = restore();
+    exec("removeFormat");
+    [...ed.querySelectorAll(".spoiler, code, span[style]")].filter((el) => r.intersectsNode(el)).forEach((el) => el.replaceWith(...el.childNodes));
+    blocksIn(r).forEach((b) => { delete b.dataset.keep; });
+  }
+  // 크롬의 insertHTML은 편집 불가 태그를 새 줄로 밀어내서, 범위에 직접 넣음
+  const insertHTML = (html) => run(() => {
+    const r = restore(); r.deleteContents();
+    const t = document.createElement("template"); t.innerHTML = html;
+    const last = t.content.lastChild; r.insertNode(t.content);
+    const nr = document.createRange(); nr.setStartAfter(last); nr.collapse(true);
+    getSelection().removeAllRanges(); getSelection().addRange(nr); saved = nr.cloneRange();
+  });
+
+  // 태그는 앞 글자와 붙지 않게 띄어서 넣음
+  function insertTok(html) {
+    const r = restore(), c = r.startContainer, o = r.startOffset;
+    let need = false;
+    if (c.nodeType === 3 && o > 0) need = !/[\s\u00a0]/.test(c.data[o - 1]);
+    else if (o > 0 && c.childNodes[o - 1]) need = !/[\s\u00a0]$/.test(c.childNodes[o - 1].textContent || "") && c.childNodes[o - 1].nodeName !== "BR";
+    insertHTML((need ? "&nbsp;" : "") + html + "&nbsp;");
+  }
+  const INLINE = {
+    bold: ['<span class="t"><b>B</b></span>', "굵게", "Ctrl+B", () => exec("bold"), "bold"],
+    italic: ['<span class="t"><i>I</i></span>', "기울임", "Ctrl+I", () => exec("italic"), "italic"],
+    underline: ['<span class="t"><u>U</u></span>', "밑줄", "Ctrl+U", () => exec("underline"), "underline"],
+    strike: ['<span class="t"><s>S</s></span>', "취소선", "Ctrl+Shift+X", () => exec("strikeThrough"), "strikeThrough"],
+    spoiler: [ic("spoiler"), "스포일러", "Ctrl+Shift+S", () => wrapClass("SPAN", "spoiler", "숨긴 내용"), "spoiler"],
+    code: [ic("code"), "인라인 코드", "Ctrl+E", () => wrapClass("CODE", "", "코드"), "code"],
+  };
+  const BLOCKS = [
+    ["p", "본문", "일반 글", "Aa", ""], ["h1", "큰 제목", "# 제목", "H1", "1.5em"], ["h2", "중간 제목", "## 제목", "H2", "1.25em"],
+    ["h3", "작은 제목", "### 제목", "H3", "1.05em"], ["sub", "작은 글씨", "-# 회색 작은 글씨", "-#", "12px"],
+  ];
+  const LINES = [["quote", "인용", "quote"], ["li", "글머리 목록", "list"], ["ol", "번호 목록", "ol"], ["code", "코드블록", "block"]];
+  const stateBtns = [];
+  const mkBtn = (html, label, keys, onClick, stateKey, host) => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "tb"; b.innerHTML = html;
+    b.title = label + (keys ? " (" + keys + ")" : ""); b.setAttribute("aria-label", label);
+    if (stateKey) { b.setAttribute("aria-pressed", "false"); stateBtns.push([b, stateKey]); }
+    b.addEventListener("mousedown", (e) => e.preventDefault());
+    b.addEventListener("click", onClick); host.appendChild(b); return b;
+  };
+  const sep = (host) => { const d = document.createElement("span"); d.className = "sep"; host.appendChild(d); };
+  // 리본: 문단 스타일 드롭다운
+  const blockBtn = document.createElement("button");
+  blockBtn.type = "button"; blockBtn.className = "tb blockbtn"; blockBtn.setAttribute("aria-haspopup", "listbox"); blockBtn.title = "문단 스타일";
+  blockBtn.innerHTML = '<span id="blockLbl">본문</span>' + ic("down");
+  blockBtn.addEventListener("mousedown", (e) => e.preventDefault());
+  $("fmtBar").appendChild(blockBtn);
+  sep($("fmtBar"));
+  for (const k of Object.keys(INLINE)) { const [h, l, keys, fn, st] = INLINE[k]; mkBtn(h, l, keys, () => run(fn), st, $("fmtBar")); }
+  sep($("fmtBar"));
+  for (const [t, l, icon] of LINES) mkBtn(ic(icon), l, "", () => run(() => setBlock(t)), "b:" + t, $("fmtBar"));
+  sep($("fmtBar"));
+  mkBtn(ic("eraser"), "서식 지우기", "", () => run(clearFormat), "", $("fmtBar"));
+
+  const bm = $("blockMenu");
+  for (const [t, l, d, badge, size] of BLOCKS) {
+    const b = document.createElement("button"); b.type = "button"; b.className = "mi"; b.setAttribute("role", "option"); b.dataset.t = t;
+    b.innerHTML = '<span class="badge">' + badge + '</span><span><span style="font-weight:' + (t.startsWith("h") ? 700 : 500) + (t === "sub" ? ";font-size:12px;color:var(--muted)" : "") + '">' + l + '</span><span class="d">' + esc(d) + "</span></span>";
+    b.addEventListener("mousedown", (e) => e.preventDefault());
+    b.addEventListener("click", () => { bm.hidden = true; run(() => setBlock(t, true)); });
+    bm.appendChild(b);
+  }
+  const placeMenu = (menu, rect, below = true) => {
+    menu.hidden = false;
+    const mw = menu.offsetWidth, mh = menu.offsetHeight;
+    let x = Math.min(Math.max(8, rect.left + window.scrollX), window.scrollX + innerWidth - mw - 8);
+    let y = rect.bottom + window.scrollY + 6;
+    if (!below || rect.bottom + mh + 12 > innerHeight) y = Math.max(window.scrollY + 8, rect.top + window.scrollY - mh - 6);
+    menu.style.left = x + "px"; menu.style.top = y + "px";
+  };
+  blockBtn.addEventListener("click", () => {
+    if (!bm.hidden) { bm.hidden = true; return; }
+    const cur = (curBlock() || {}).dataset?.b || "p";
+    bm.querySelectorAll(".mi").forEach((m) => m.setAttribute("aria-selected", String(m.dataset.t === cur)));
+    placeMenu(bm, blockBtn.getBoundingClientRect());
+  });
+  document.addEventListener("mousedown", (e) => { if (!e.target.closest("#blockMenu, .blockbtn")) bm.hidden = true; });
+
+  // 미니 툴바 (선택했을 때)
+  const bub = $("bubble");
+  for (const k of Object.keys(INLINE)) { const [h, l, keys, fn, st] = INLINE[k]; mkBtn(h, l, keys, () => run(fn), st, bub); }
+  sep(bub);
+  const BUB_COLORS = [31, 33, 32, 36, 34, 35, 37];
+  for (const c of BUB_COLORS) {
+    const d = document.createElement("button"); d.type = "button"; d.className = "cd"; d.style.background = ANSI_FG[c]; d.title = "글자색"; d.setAttribute("aria-label", "글자색 " + c);
+    d.addEventListener("mousedown", (e) => e.preventDefault()); d.addEventListener("click", () => applyColor("fg", c)); bub.appendChild(d);
+  }
+  { const d = document.createElement("button"); d.type = "button"; d.className = "cd rb"; d.title = "무지개"; d.setAttribute("aria-label", "무지개");
+    d.addEventListener("mousedown", (e) => e.preventDefault()); d.addEventListener("click", rainbow); bub.appendChild(d); }
+  { const d = document.createElement("button"); d.type = "button"; d.className = "cd none"; d.title = "색 지우기"; d.setAttribute("aria-label", "색 지우기");
+    d.addEventListener("mousedown", (e) => e.preventDefault()); d.addEventListener("click", () => applyColor("fg", 0)); bub.appendChild(d); }
+  sep(bub);
+  mkBtn(ic("font"), "특수 글꼴", "", () => openPanel("fonts", true), "", bub);
+  mkBtn(ic("link"), "링크", "", () => openPanel("link", true), "", bub);
+  mkBtn(ic("eraser"), "서식 지우기", "", () => run(clearFormat), "", bub);
+
+  let pointerDown = false;
+  ed.addEventListener("pointerdown", () => { pointerDown = true; bub.hidden = true; });
+  document.addEventListener("pointerup", () => { if (pointerDown) { pointerDown = false; setTimeout(updateBubble, 0); } });
+  const coarse = matchMedia("(pointer: coarse)").matches;
+  function updateBubble() {
+    const s = getSelection();
+    if (pointerDown || !s.rangeCount || s.isCollapsed || !inEd(s.anchorNode) || !$("slash").hidden) { bub.hidden = true; return; }
+    const rect = s.getRangeAt(0).getBoundingClientRect();
+    if (!rect.width && !rect.height) { bub.hidden = true; return; }
+    const wasHidden = bub.hidden; bub.hidden = false;
+    const bw = bub.offsetWidth, bh = bub.offsetHeight;
+    const x = Math.min(Math.max(8, rect.left + rect.width / 2 - bw / 2), innerWidth - bw - 8);
+    let y = rect.top - bh - 10;
+    if (coarse || y < 70) y = rect.bottom + 10;
+    bub.style.left = x + "px"; bub.style.top = y + "px";
+    if (wasHidden) { bub.style.animation = "none"; bub.offsetWidth; bub.style.animation = ""; }
+  }
+  window.addEventListener("scroll", () => { if (!bub.hidden) updateBubble(); }, { passive: true });
+  window.addEventListener("resize", () => { if (!bub.hidden) updateBubble(); });
+
+  function refreshState() {
+    const s = getSelection(); if (!s.rangeCount || !inEd(s.anchorNode)) return;
+    const b = curBlock(), el = s.anchorNode.nodeType === 1 ? s.anchorNode : s.anchorNode.parentElement;
+    for (const [btn, key] of stateBtns) {
+      let on = false;
+      if (key.startsWith("b:")) on = !!b && !isAnsi(b) && (b.dataset.b || "p") === key.slice(2);
+      else if (key === "spoiler") on = !!el?.closest?.(".spoiler");
+      else if (key === "code") on = !!el?.closest?.("code");
+      else { try { on = document.queryCommandState(key); } catch (_) {} }
+      btn.setAttribute("aria-pressed", String(on));
+    }
+    const bt = b ? (isAnsi(b) ? null : b.dataset.b) : "p";
+    const found = BLOCKS.find((x) => x[0] === bt);
+    $("blockLbl").textContent = b && isAnsi(b) ? "색 코드블록" : found ? found[1] : (LINES.find((x) => x[0] === bt) || [0, "본문"])[1];
+    if (curPanel === "fonts" && !$("side").hidden && saved && !saved.collapsed) { $("fontInput").value = saved.toString(); updateFonts(); }
+  }
+  document.addEventListener("selectionchange", () => {
+    const s = getSelection();
+    if (s.rangeCount && inEd(s.anchorNode)) { saved = s.getRangeAt(0).cloneRange(); refreshState(); }
+    if (!pointerDown) updateBubble();
+  });
+  ed.addEventListener("blur", () => setTimeout(() => { if (!inEd(document.activeElement) && document.activeElement !== ed) bub.hidden = true; }, 0));
+
+  /* ================= "/" 빠른 메뉴 ================= */
+  const SLASH = [
+    ["본문", "p text 본문 일반", "Aa", () => setBlock("p", true)],
+    ["큰 제목", "h1 heading 제목 큰", "H1", () => setBlock("h1", true)],
+    ["중간 제목", "h2 heading 제목 중간", "H2", () => setBlock("h2", true)],
+    ["작은 제목", "h3 heading 제목 작은", "H3", () => setBlock("h3", true)],
+    ["작은 글씨", "sub small 작은 글씨 회색", "-#", () => setBlock("sub", true)],
+    ["인용", "quote 인용", "❝", () => setBlock("quote", true)],
+    ["글머리 목록", "list bullet 목록", "•", () => setBlock("li", true)],
+    ["번호 목록", "ol number 번호 목록", "1.", () => setBlock("ol", true)],
+    ["코드블록", "code block 코드", "{ }", () => setBlock("code", true)],
+    ["타임스탬프", "time timestamp 시간 타임 날짜", "⏱", () => openPanel("time", true), true],
+    ["멘션·태그", "mention 멘션 태그 @ 사용자 역할 채널", "@", () => openPanel("mention", true), true],
+    ["색 글자", "color ansi 색 컬러", "🎨", () => openPanel("color", true), true],
+    ["템플릿", "template 템플릿 공지 이벤트", "▦", () => openPanel("tpl", true), true],
+  ];
+  const sl = $("slash");
+  let slashIdx = 0, slashItems = [], slashRange = null;
+  function slashCheck() {
+    const s = getSelection(); if (!s.rangeCount || !s.isCollapsed) return closeSlash();
+    const b = curBlock(); if (!b) return closeSlash();
+    const r = document.createRange(); r.setStart(b, 0); r.setEnd(s.anchorNode, s.anchorOffset);
+    const m = r.toString().match(/^\/([^\s/]{0,12})$/);
+    if (!m) return closeSlash();
+    const q = m[1].toLowerCase();
+    slashItems = SLASH.filter(([l, keys]) => !q || l.includes(q) || keys.toLowerCase().includes(q));
+    if (!slashItems.length) return closeSlash();
+    slashRange = r; slashIdx = Math.min(slashIdx, slashItems.length - 1);
+    sl.innerHTML = '<div class="hint" style="padding:4px 10px 6px;font-size:11px">' + (q ? "“" + esc(q) + "” 찾는 중" : "넣을 항목을 고른다") + "</div>";
+    slashItems.forEach(([l, keys, badge], i) => {
+      const it = document.createElement("button"); it.type = "button"; it.className = "mi"; it.setAttribute("role", "option"); it.setAttribute("aria-selected", String(i === slashIdx));
+      it.innerHTML = '<span class="badge">' + badge + "</span><span>" + l + "</span>";
+      it.addEventListener("mousedown", (e) => e.preventDefault());
+      it.addEventListener("click", () => chooseSlash(i));
+      sl.appendChild(it);
+    });
+    const cr = s.getRangeAt(0).getBoundingClientRect();
+    const rect = cr.height ? cr : b.getBoundingClientRect();
+    placeMenu(sl, rect); bub.hidden = true;
+  }
+  function closeSlash() { sl.hidden = true; slashIdx = 0; }
+  function chooseSlash(i) {
+    const item = slashItems[i]; if (!item) return;
+    closeSlash(); snapshot();
+    const b = curBlock();
+    slashRange.deleteContents();
+    if (b && isEmptyBlk(b)) { b.innerHTML = "<br>"; caretIn(b); }
+    if (item[4]) { after(); item[3](); } else { item[3](); after(); }
+  }
+  function slashKey(e) {
+    if (sl.hidden) return false;
+    if (e.key === "ArrowDown") { slashIdx = (slashIdx + 1) % slashItems.length; }
+    else if (e.key === "ArrowUp") { slashIdx = (slashIdx - 1 + slashItems.length) % slashItems.length; }
+    else if (e.key === "Enter" || e.key === "Tab") { e.preventDefault(); chooseSlash(slashIdx); return true; }
+    else if (e.key === "Escape") { e.preventDefault(); closeSlash(); return true; }
+    else return false;
+    e.preventDefault();
+    sl.querySelectorAll(".mi").forEach((m, j) => m.setAttribute("aria-selected", String(j === slashIdx)));
+    sl.querySelectorAll(".mi")[slashIdx]?.scrollIntoView({ block: "nearest" });
+    return true;
+  }
+  document.addEventListener("mousedown", (e) => { if (!e.target.closest("#slash")) closeSlash(); });
+
+  /* ================= 키보드 ================= */
+  ed.addEventListener("keydown", (e) => {
+    if (slashKey(e)) return;
+    if (e.key === "Enter" && !e.isComposing && !(e.ctrlKey || e.metaKey)) {
+      const b = curBlock();
+      if (e.shiftKey) { e.preventDefault(); snapshot(); document.execCommand("insertParagraph"); after(); return; }
+      if (b && isEmptyBlk(b) && (["li", "ol", "quote", "code"].includes(b.dataset.b) || b.dataset.keep)) {
+        e.preventDefault(); snapshot(); b.dataset.b = "p"; delete b.dataset.keep; b.innerHTML = "<br>"; caretIn(b); after(); return;
+      }
+    }
+    if (e.key === "Escape") { bub.hidden = true; return; }
+    if (!(e.ctrlKey || e.metaKey) || e.isComposing) return;
+    const k = e.key.toLowerCase();
+    const map = e.shiftKey
+      ? { s: () => run(INLINE.spoiler[3]), x: () => run(INLINE.strike[3]), z: redo }
+      : { b: () => run(INLINE.bold[3]), i: () => run(INLINE.italic[3]), u: () => run(INLINE.underline[3]), e: () => run(INLINE.code[3]), z: undo, y: redo, enter: copyOut };
+    if (map[k]) { e.preventDefault(); map[k](); }
+  });
+  ed.addEventListener("beforeinput", (e) => {
+    if (e.inputType === "historyUndo") { e.preventDefault(); undo(); return; }
+    if (e.inputType === "historyRedo") { e.preventDefault(); redo(); return; }
+    if (Date.now() - lastSnap > 1000) snapshot();
+  });
+  ed.addEventListener("input", (e) => {
+    if (e.inputType === "insertParagraph") {
+      const b = curBlock();
+      if (b && /^(h\d|sub)$/.test(b.dataset.b) && isEmptyBlk(b)) b.dataset.b = "p";
+      if (b && isEmptyBlk(b)) { b.innerHTML = "<br>"; caretIn(b); }
+    }
+    after();
+    slashCheck();
+  });
+  ed.addEventListener("paste", (e) => {
+    e.preventDefault();
+    const t = (e.clipboardData || window.clipboardData).getData("text/plain");
+    if (!t) return;
+    if (!t.includes("\n")) insertHTML(inlineEd(t));
+    else insertHTML(importMd(t));
+  });
+  ed.addEventListener("click", (e) => { const a = e.target.closest("a"); if (a && (e.ctrlKey || e.metaKey)) window.open(a.href, "_blank", "noopener"); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") { if (!$("help").hidden) return closeHelp(); if (!$("side").hidden && !inEd(document.activeElement)) return openPanel(null); }
+    if (e.key === "?" && !inEd(e.target) && !/INPUT|TEXTAREA/.test(e.target.tagName)) openHelp();
+  });
+
+  /* ================= 복사 ================= */
+  function copyOut() {
+    const md = serialize();
+    if (!md.trim()) return toast("복사할 내용이 없다");
+    const ok = () => {
+      const b = $("copyBtn"); b.classList.add("ok"); b.innerHTML = ic("check") + "<span>복사했다</span>";
+      clearTimeout(copyOut.t); copyOut.t = setTimeout(() => { b.classList.remove("ok"); b.innerHTML = COPY_HTML; }, 1800);
+      toast("디스코드 입력창에 붙여 넣으면 된다");
+    };
+    const fail = () => { openPanel("code", true); const cb = $("codeBox"); cb.value = md; cb.focus(); cb.select(); toast("자동 복사가 막혔다. 선택된 코드를 Ctrl+C로 복사한다"); };
+    try { navigator.clipboard.writeText(md).then(ok, fail); } catch (_) { fail(); }
+  }
+  $("copyBtn").addEventListener("click", copyOut);
+  $("undoBtn").addEventListener("click", undo);
+  $("redoBtn").addEventListener("click", redo);
+  $("clearBtn").addEventListener("click", () => { snapshot(); ed.innerHTML = blk("p", ""); ed.focus(); caretEnd(); after(); toast("새로 시작한다. 되돌리기로 복구할 수 있다"); });
+
+  /* ================= 도구 패널 ================= */
+  const TOOLS = [["color", "색", "palette", "색 입히기"], ["fonts", "특수 글꼴", "font", "특수 글꼴"], ["link", "링크", "link", "링크 숨기기"], ["time", "타임스탬프", "clock", "타임스탬프"], ["mention", "멘션", "at", "멘션·태그"], ["tpl", "템플릿", "tpl", "템플릿"], ["code", "코드 보기", "braces", "디스코드 코드"]];
+  let curPanel = null;
+  for (const [p, l, icon] of TOOLS) {
+    const b = document.createElement("button"); b.type = "button"; b.className = "tool"; b.dataset.p = p; b.setAttribute("aria-expanded", "false"); b.title = l;
+    b.innerHTML = ic(icon) + "<span>" + l + "</span>";
+    b.addEventListener("mousedown", (e) => e.preventDefault());
+    b.addEventListener("click", () => openPanel(p));
+    $("toolBar").appendChild(b);
+  }
+  function openPanel(p, force) {
+    const opening = !!p && (force || curPanel !== p || $("side").hidden);
+    curPanel = opening ? p : null;
+    $("side").hidden = !opening;
+    $("layout").classList.toggle("has-side", opening);
+    document.querySelectorAll(".panel[data-p]").forEach((el) => { el.hidden = el.dataset.p !== p; });
+    document.querySelectorAll(".tool").forEach((b) => b.setAttribute("aria-expanded", String(opening && b.dataset.p === p)));
+    if (!opening) return;
+    const t = TOOLS.find((x) => x[0] === p);
+    $("sideTitle").textContent = t[3]; $("sideIco").innerHTML = ic(t[2]);
+    $("side").scrollTop = 0;
+    if (p === "fonts") { if (saved && !saved.collapsed) $("fontInput").value = saved.toString(); updateFonts(); }
+    if (p === "time") updateTs();
+    if (p === "code") $("codeBox").value = serialize().split(ESC).join(VIS);
+    if (p === "link") { const a = saved && (saved.startContainer.parentElement?.closest?.("a")); $("linkUrl").value = a ? a.getAttribute("href") : ""; setTimeout(() => $("linkUrl").focus(), 50); }
+    if (p === "mention") setTimeout(() => $("mText").focus(), 50);
+  }
+  $("sideClose").addEventListener("click", () => openPanel(null));
+  document.querySelectorAll(".side").forEach((d) => d.addEventListener("mousedown", (e) => { if (e.target.closest("button")) e.preventDefault(); }));
+
+  /* --- 색 --- */
+  const FG = [[30, "회색"], [31, "빨강"], [32, "초록"], [33, "노랑"], [34, "파랑"], [35, "분홍"], [36, "청록"], [37, "흰색"]];
+  const BG = [[40, "짙은 남색"], [41, "주황"], [42, "회색 1"], [43, "회색 2"], [44, "회색 3"], [45, "보라"], [46, "회색 4"], [47, "아이보리"]];
+  function needSel() { const r = restore(); if (r.collapsed) { toast("색을 입힐 글자를 먼저 선택한다"); return null; } return r; }
+  function stripProp(prop) {
+    const r = restore();
+    [...ed.querySelectorAll("span[style]")].filter((el) => r.intersectsNode(el)).forEach((el) => { el.style.removeProperty(prop); if (!el.getAttribute("style")) el.removeAttribute("style"); });
+  }
+  function applyColor(kind, code) {
+    if (!needSel()) return;
+    run(() => {
+      if (!code) { stripProp(kind === "fg" ? "color" : "background-color"); if (kind === "fg") stripProp("background-color"); blocksIn(restore()).forEach((b) => delete b.dataset.keep); return; }
+      exec(kind === "fg" ? "foreColor" : "hiliteColor", (kind === "fg" ? ANSI_FG : ANSI_BG)[code], true);
+    });
+  }
+  const RAINBOW = [31, 33, 32, 36, 34, 35];
+  function rainbow() {
+    const r = needSel(); if (!r) return;
+    if (blocksIn(r).length > 1) return toast("무지개는 한 줄씩만 된다");
+    let k = 0; const html = [...r.toString()].map((ch) => /\s/.test(ch) ? esc(ch) : '<span style="color:' + ANSI_FG[RAINBOW[k++ % 6]] + '"><b>' + esc(ch) + "</b></span>").join("");
+    insertHTML(html);
+  }
+  function makeSw(host, list, kind, colors) {
+    const mk = (code, name) => {
+      const b = document.createElement("button"); b.type = "button"; b.className = "sw" + (code ? "" : " none"); b.title = name; b.setAttribute("aria-label", (kind === "fg" ? "글자색 " : "배경색 ") + name);
+      if (code) b.style.background = colors[code];
+      b.addEventListener("click", () => applyColor(kind, code)); host.appendChild(b);
+    };
+    mk(0, "없음"); for (const [c, n] of list) mk(c, n);
+  }
+  makeSw($("fgSw"), FG, "fg", ANSI_FG); makeSw($("bgSw"), BG, "bg", ANSI_BG);
+  const PRESETS = [["경고", { fg: 31, b: 1 }], ["성공", { fg: 32, b: 1 }], ["주의", { fg: 33 }], ["정보", { fg: 34 }], ["강조 배지", { fg: 37, bg: 45, b: 1 }], ["형광펜", { fg: 30, bg: 47 }], ["🌈 무지개", "rainbow"]];
+  for (const [name, st] of PRESETS) {
+    const b = document.createElement("button"); b.className = "chip"; b.type = "button"; b.textContent = name;
+    if (st !== "rainbow") { if (st.bg) { b.style.background = ANSI_BG[st.bg]; b.style.color = ANSI_FG[st.fg]; b.style.borderColor = "transparent"; } else b.style.color = ANSI_FG[st.fg]; if (st.b) b.style.fontWeight = "700"; }
+    b.addEventListener("click", () => {
+      if (st === "rainbow") return rainbow();
+      if (!needSel()) return;
+      run(() => {
+        stripProp("color"); stripProp("background-color");
+        restore(); exec("foreColor", ANSI_FG[st.fg], true);
+        if (st.bg) exec("hiliteColor", ANSI_BG[st.bg], true);
+        let bold = false; try { bold = document.queryCommandState("bold"); } catch (_) {}
+        if (!!st.b !== bold) exec("bold");
+      });
+    });
+    $("presets").appendChild(b);
+  }
+
+  /* --- 특수 글꼴 --- */
+  const cp = String.fromCodePoint;
+  const alpha = (U, L, D, ex = {}) => (ch) => { if (ex[ch]) return ex[ch]; const c = ch.charCodeAt(0); if (U && c >= 65 && c <= 90) return cp(U + c - 65); if (L && c >= 97 && c <= 122) return cp(L + c - 97); if (D && c >= 48 && c <= 57) return cp(D + c - 48); return ch; };
+  const mapStr = (from, to) => { const t = [...to]; return (ch) => { const i = from.indexOf(ch); return i < 0 ? ch : t[i]; }; };
+  const lower = "abcdefghijklmnopqrstuvwxyz";
+  const upperRange = (base) => (ch) => { const c = ch.toUpperCase().charCodeAt(0); return c >= 65 && c <= 90 ? cp(base + c - 65) : ch; };
+  const FONTS = [
+    ["굵게 세리프", alpha(0x1D400, 0x1D41A, 0x1D7CE)], ["굵게 고딕", alpha(0x1D5D4, 0x1D5EE, 0x1D7EC)],
+    ["기울임", alpha(0x1D434, 0x1D44E, 0, { h: "ℎ" })], ["굵은 기울임", alpha(0x1D468, 0x1D482)],
+    ["필기체", alpha(0x1D49C, 0x1D4B6, 0, { B: "ℬ", E: "ℰ", F: "ℱ", H: "ℋ", I: "ℐ", L: "ℒ", M: "ℳ", R: "ℛ", e: "ℯ", g: "ℊ", o: "ℴ" })], ["굵은 필기체", alpha(0x1D4D0, 0x1D4EA)],
+    ["고딕 장식체", alpha(0x1D504, 0x1D51E, 0, { C: "ℭ", H: "ℌ", I: "ℑ", R: "ℜ", Z: "ℨ" })], ["겹선체", alpha(0x1D538, 0x1D552, 0x1D7D8, { C: "ℂ", H: "ℍ", N: "ℕ", P: "ℙ", Q: "ℚ", R: "ℝ", Z: "ℤ" })],
+    ["고정폭", alpha(0x1D670, 0x1D68A, 0x1D7F6)], ["전각", (ch) => ch === " " ? "\u3000" : (ch.charCodeAt(0) >= 33 && ch.charCodeAt(0) <= 126 ? cp(ch.charCodeAt(0) + 0xFEE0) : ch)],
+    ["작은 대문자", (ch) => mapStr(lower, "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘǫʀꜱᴛᴜᴠᴡxʏᴢ")(ch.toLowerCase())],
+    ["동그라미", alpha(0x24B6, 0x24D0, 0, { 0: "⓪", 1: "①", 2: "②", 3: "③", 4: "④", 5: "⑤", 6: "⑥", 7: "⑦", 8: "⑧", 9: "⑨" })], ["검은 동그라미", upperRange(0x1F150)],
+    ["네모", upperRange(0x1F130)], ["검은 네모", upperRange(0x1F170)],
+    ["취소선 (닉네임용)", (ch) => ch === " " ? ch : ch + "\u0336"], ["밑줄 (닉네임용)", (ch) => ch + "\u0332"],
+    ["간격 넓게", (ch) => ch + " ", "trim"],
+    ["뒤집기", (ch) => mapStr(lower + "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,!?'", "ɐqɔpǝɟƃɥᴉɾʞlɯuodbɹsʇnʌʍxʎz∀ᗺƆᗡƎℲ⅁HIſꞰ˥WNOԀῸᴚS⊥∩ΛMX⅄Z0ƖᄅƐㄣϛ9ㄥ86˙'¡¿,")(ch), "rev"],
+  ];
+  const convert = (src, fn, mode) => { let o = [...src].map(fn).join(""); if (mode === "trim") o = o.trimEnd(); if (mode === "rev") o = [...o].reverse().join(""); return o; };
+  function updateFonts() {
+    const src = $("fontInput").value || "Discord Font 2026", list = $("fontList"); list.textContent = "";
+    for (const [name, fn, mode] of FONTS) {
+      const b = document.createElement("button"); b.type = "button"; b.className = "item";
+      b.innerHTML = '<span class="nm">' + name + '</span><span class="val">' + esc(convert(src, fn, mode)) + '</span><span class="go">적용</span>';
+      b.addEventListener("click", () => {
+        const r = restore(), has = !r.collapsed;
+        run(() => exec("insertText", convert(has ? r.toString() : src, fn, mode)));
+        toast(has ? "선택한 글자를 " + name + "로 바꿨다" : name + " 글자를 넣었다");
+      });
+      list.appendChild(b);
+    }
+  }
+  $("fontInput").addEventListener("input", updateFonts);
+
+  /* --- 링크 --- */
+  function applyLink() {
+    let url = $("linkUrl").value.trim();
+    if (!url) return toast("주소를 넣어야 한다");
+    if (!/^https?:\/\//.test(url)) url = "https://" + url;
+    const r = restore();
+    if (r.collapsed) insertHTML('<a href="' + esc(url) + '">' + esc(url) + "</a>&nbsp;");
+    else run(() => exec("createLink", url));
+    toast("링크를 걸었다");
+  }
+  $("linkApply").addEventListener("click", applyLink);
+  $("linkUrl").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); applyLink(); } });
+  $("linkRemove").addEventListener("click", () => run(() => { const r = restore(); const a = r.startContainer.parentElement?.closest?.("a"); if (a && r.collapsed) a.replaceWith(...a.childNodes); else exec("unlink"); }));
+
+  /* --- 타임스탬프 --- */
+  const tsIn = $("tsInput");
+  const toLocal = (d) => d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
+  const nextHour = () => { const d = new Date(); d.setMinutes(0, 0, 0); d.setHours(d.getHours() + 2); return Math.floor(d / 1000); };
+  tsIn.value = toLocal(new Date(nextHour() * 1000));
+  function updateTs() {
+    const d = new Date(tsIn.value); if (isNaN(d)) return;
+    const unix = Math.floor(d / 1000), list = $("tsList"); list.textContent = "";
+    for (const [f, name, fn] of TS) {
+      const code = "<t:" + unix + ":" + f + ">";
+      const b = document.createElement("button"); b.type = "button"; b.className = "item";
+      b.innerHTML = '<span class="nm">' + name + '</span><span class="val">' + esc(fn(d)) + '<span class="code">' + esc(code) + '</span></span><span class="go">넣기</span>' + (f === "R" ? '<span class="tip">' + ic("clock") + '디스코드에서 실시간으로 바뀐다 (예: 3분 전 → 4분 전)</span>' : "");
+      b.addEventListener("click", () => { insertTok(tok(code, fn(d), "ts")); toast(name + " 타임스탬프를 넣었다"); });
+      list.appendChild(b);
+    }
+  }
+  tsIn.addEventListener("input", updateTs);
+  document.querySelectorAll("[data-add]").forEach((b) => b.addEventListener("click", () => { const add = +b.dataset.add, base = add === 0 ? new Date() : new Date(tsIn.value || Date.now()); tsIn.value = toLocal(new Date(+base + add * 1000)); updateTs(); }));
+
+  /* --- 멘션 --- */
+  const MT = {
+    user: ["사용자", "예: 철수", (n) => "@" + n, (id) => "<@" + id + ">"],
+    role: ["역할", "예: 운영진", (n) => "@" + n, (id) => "<@&" + id + ">"],
+    channel: ["채널", "예: 공지사항", (n) => "#" + n.replace(/\s+/g, "-"), (id) => "<#" + id + ">"],
+    emoji: ["이모지", "예: smile", (n) => ":" + n.replace(/\s+/g, "_") + ":", null],
+  };
+  let mType = "user";
+  function setMType(t) {
+    mType = t;
+    document.querySelectorAll("#mType button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.t === t)));
+    $("mText").placeholder = MT[t][0] + " 이름 (" + MT[t][1] + ")";
+  }
+  document.querySelectorAll("#mType button").forEach((b) => b.addEventListener("click", () => { setMType(b.dataset.t); $("mText").focus(); }));
+  setMType("user");
+  function insertMention() {
+    const v = $("mText").value.trim().replace(/^[@#:]+|:+$/g, "");
+    if (!v) { $("mText").focus(); return toast("태그할 " + MT[mType][0] + " 이름을 써야 한다"); }
+    const [label, , byName, byId] = MT[mType];
+    const isId = /^\d{15,21}$/.test(v) && byId;
+    const raw = isId ? byId(v) : byName(v);
+    const look = isId ? (mType === "channel" ? "# " : "@") + label + " (ID)" : byName(v);
+    insertTok(tok(raw, look));
+    $("mText").value = "";
+    toast(look + " 태그를 넣었다");
+  }
+  $("mInsert").addEventListener("click", insertMention);
+  $("mText").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); insertMention(); } });
+  document.querySelectorAll("[data-quick]").forEach((b) => b.addEventListener("click", () => { insertTok(tok(b.dataset.quick, b.dataset.quick)); toast(b.dataset.quick + " 태그를 넣었다"); }));
+
+  /* --- 템플릿 --- */
+  const TEMPLATES = [
+    ["📢 공지", () => "# 📢 공지사항\n**서버 이용 규칙이 바뀌었어요.**\n> 적용일: <t:" + nextHour() + ":D>\n- 변경 1: \n- 변경 2: \n-# 문의는 운영진에게 DM 주세요"],
+    ["🎉 이벤트", () => "## 🎉 이벤트 안내\n**시작:** <t:" + nextHour() + ":F> (<t:" + nextHour() + ":R>)\n**장소:** #이벤트-채널\n**보상:** ||비밀 보상||\n\n참여하실 분은 ✅ 반응을 눌러 주세요!"],
+    ["📜 서버 규칙", () => "# 📜 서버 규칙\n1. 서로 존중해 주세요.\n2. 도배, 광고는 금지예요.\n3. 스포일러는 ||이렇게|| 가려 주세요.\n4. 주제에 맞는 채널을 이용해 주세요.\n-# 규칙을 어기면 경고 없이 제재될 수 있어요"],
+    ["👋 자기소개", () => "### 👋 자기소개\n**닉네임:** \n**좋아하는 것:** \n**한마디:** *잘 부탁드려요!*"],
+    ["🛠 점검 알림 (컬러)", () => "```ansi\n" + ESC + "[0;1;33m[알림]" + ESC + "[0m " + ESC + "[0;1;4;37m서버 점검 안내" + ESC + "[0m\n상태: " + ESC + "[0;32m진행 중" + ESC + "[0m\n완료: " + ESC + "[0;37;45m오후 6시" + ESC + "[0m\n```"],
+  ];
+  for (const [name, fn] of TEMPLATES) {
+    const b = document.createElement("button"); b.type = "button"; b.className = "item";
+    const pv = fn().replace(/\u001b\[[\d;]*m/g, "").replace(/```ansi\n/, "").replace(/[#*|>_-]+ ?/g, "").split("\n").slice(0, 2).join(" · ");
+    b.innerHTML = '<span class="val" style="font-weight:600">' + esc(name) + '</span><span class="nm" style="font-size:12px">' + esc(pv) + '</span><span class="go">넣기</span>';
+    b.addEventListener("click", () => {
+      snapshot();
+      if (ed.children.length === 1 && isEmptyBlk(ed.firstElementChild)) ed.innerHTML = importMd(fn()); else ed.insertAdjacentHTML("beforeend", blk("p", "") + importMd(fn()));
+      ed.focus(); caretEnd(); after(); toast(name + " 템플릿을 넣었다");
+    });
+    $("tplList").appendChild(b);
+  }
+
+  /* --- 코드 보기 (양방향) --- */
+  let codeT, codeSnap = 0;
+  $("codeBox").addEventListener("input", () => {
+    if (Date.now() - codeSnap > 1500) { snapshot(); codeSnap = Date.now(); }
+    clearTimeout(codeT);
+    codeT = setTimeout(() => { ed.innerHTML = importMd($("codeBox").value); saved = null; after(); }, 150);
+  });
+
+  /* --- 도움말 --- */
+  const KEYS = [["굵게", "Ctrl B"], ["기울임", "Ctrl I"], ["밑줄", "Ctrl U"], ["취소선", "Ctrl Shift X"], ["스포일러", "Ctrl Shift S"], ["인라인 코드", "Ctrl E"], ["빠른 메뉴", "/"], ["되돌리기 / 다시 실행", "Ctrl Z / Ctrl Y"], ["디스코드용으로 복사", "Ctrl Enter"], ["목록·인용 빠져나오기", "빈 줄에서 Enter"]];
+  $("keys").innerHTML = KEYS.map(([l, k]) => "<span>" + l + '</span><span class="kk">' + k.split(" ").map((x) => x === "/" && k !== "/" ? '<span style="color:var(--muted)">/</span>' : '<span class="kbd">' + esc(x) + "</span>").join("") + "</span>").join("");
+  function openHelp() { $("help").hidden = false; $("helpClose").focus(); }
+  function closeHelp() { $("help").hidden = true; }
+  $("helpBtn").addEventListener("click", openHelp);
+  $("helpClose").addEventListener("click", closeHelp);
+  $("help").addEventListener("click", (e) => { if (e.target === $("help")) closeHelp(); });
+
+  /* ================= 시작 ================= */
+  try { document.execCommand("defaultParagraphSeparator", false, "div"); } catch (_) {}
+  const SAMPLE = "# 오늘의 공지\n**길드 레이드**는 __<t:" + nextHour() + ":t>__에 시작해요! (<t:" + nextHour() + ":R>)\n> 준비물: 물약, *버프 음식*\n- 집합 장소: `#레이드-대기실`\n- 보상: ||전설 무기 상자||\n```ansi\n" + ESC + "[0;1;31m지각하면" + ESC + "[0m " + ESC + "[0;1;4;33m입장 불가" + ESC + "[0m\n```\n-# 글자를 드래그하면 서식 툴바가 뜬다 · 줄 맨 앞에서 / 를 누르면 메뉴가 열린다";
+  ed.innerHTML = importMd(store.get("draft2", null) ?? SAMPLE);
+  after();
+  $("now").textContent = "오늘 " + new Date().toLocaleTimeString("ko-KR", { hour: "numeric", minute: "2-digit" });
+  window.__dfs = { serialize, importMd };
+})();
+</script>
+</body></html>
