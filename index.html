@@ -97,6 +97,10 @@ a.iconbtn { text-decoration: none; }
 .mi .k { margin-left: auto; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
 .mi .badge { width: 30px; height: 30px; border-radius: 8px; background: var(--surface-2); display: grid; place-items: center; font-size: 12px; font-weight: 700; flex: 0 0 auto; border: 1px solid var(--line); }
 .mi[aria-selected="true"] .badge { background: var(--surface); }
+#mpop { min-width: 240px; }
+#mpop .mhint { padding: 4px 10px 6px; font-size: 11px; color: var(--muted); line-height: 1.45; }
+#mpop .mhint b { color: var(--fg); font-weight: 600; }
+#mpop .mi .who { font-weight: 600; color: var(--fg); }
 .mi .d { display: block; font-size: 11px; color: var(--muted); line-height: 1.3; }
 
 /* 편집면 */
@@ -342,7 +346,7 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
       </div>
       <div class="inline"><input type="text" id="mText" aria-label="태그할 이름" autocomplete="off"><button class="btn sm" id="mInsert">넣기</button></div>
       <div class="row" style="gap:6px"><button class="chip" data-quick="@everyone">@everyone</button><button class="chip" data-quick="@here">@here</button></div>
-      <p class="hint">이름을 쓰고 Enter를 누르면 태그가 들어갑니다. 디스코드에서 보내면 이름이 같은 대상이 태그됩니다. 숫자 ID를 넣으면 ID 코드로 바꿉니다(봇·웹훅용).</p>
+      <p class="hint">편집기에서 바로 @이름, #채널을 써도 선택지가 뜹니다. 여기서는 이름을 쓰고 Enter를 누르면 태그가 들어갑니다. 디스코드에서 보내면 이름이 같은 대상이 태그됩니다. 숫자 ID를 넣으면 ID 코드로 바꿉니다(봇·웹훅용).</p>
     </section>
 
     <section class="panel" data-p="tpl" hidden>
@@ -359,6 +363,7 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
 
 <div class="menu" id="blockMenu" role="listbox" aria-label="문단 스타일" hidden></div>
 <div class="menu" id="slash" role="listbox" aria-label="빠른 메뉴" hidden></div>
+<div class="menu" id="mpop" role="listbox" aria-label="멘션으로 바꾸기" hidden></div>
 <div class="bubble" id="bubble" role="toolbar" aria-label="선택한 글자 서식" hidden></div>
 
 <div class="overlay" id="help" hidden>
@@ -370,6 +375,7 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
         <li>그냥 쓰고, 꾸밀 글자를 드래그하면 미니 툴바가 뜹니다.</li>
         <li>줄 맨 앞에서 <span class="kbd">/</span>를 누르면 제목·목록·코드블록·타임스탬프 메뉴가 열립니다.</li>
         <li>다 쓰면 <b>디스코드용으로 복사</b>를 누르고 디스코드에 붙여 넣습니다.</li>
+        <li><span class="kbd">@</span>이름이나 <span class="kbd">#</span>채널을 쓰면 멘션 선택지가 뜹니다. 고르지 않으면 그냥 글자로 남습니다.</li>
         <li>디스코드 메시지를 붙여 넣으면 서식이 살아난 채로 들어옵니다.</li>
       </ol>
       <h3>단축키 (Mac은 ⌘)</h3>
@@ -947,9 +953,81 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
   }
   document.addEventListener("mousedown", (e) => { if (!e.target.closest("#slash")) closeSlash(); });
 
+  /* ================= @·# 입력 시 멘션 제안 (강제 변환 없음) ================= */
+  const mp = $("mpop");
+  let mpIdx = -1, mpItems = [], mpRange = null, mpDismiss = null;
+  function mpClose() { mp.hidden = true; mpIdx = -1; mpItems = []; }
+  function mpCheck() {
+    const s = getSelection(); if (!s.rangeCount || !s.isCollapsed || !sl.hidden) return mpClose();
+    const b = curBlock(); if (!b || b.dataset.b === "code" || b.dataset.keep) return mpClose();
+    const an = s.anchorNode.nodeType === 1 ? s.anchorNode : s.anchorNode.parentElement;
+    if (an.closest("code, .tok, a")) return mpClose();
+    const r = document.createRange(); r.setStart(b, 0); r.setEnd(s.anchorNode, s.anchorOffset);
+    const before = r.toString();
+    const m = before.match(/(^|[\s (])([@#])([^\s @#<>]{1,32})$/);
+    if (!m) { mpDismiss = null; return mpClose(); }
+    const at = before.length - m[2].length - m[3].length;
+    if (mpDismiss && mpDismiss.b === b && mpDismiss.at === at) return mpClose();
+    const sign = m[2], q = m[3];
+    // 바꿀 구간: 기호부터 커서까지 (텍스트 노드 안에서만)
+    const tn = s.anchorNode, len = sign.length + q.length;
+    if (tn.nodeType !== 3 || s.anchorOffset < len || tn.data.slice(s.anchorOffset - len, s.anchorOffset) !== sign + q) return mpClose();
+    mpRange = document.createRange(); mpRange.setStart(tn, s.anchorOffset - len); mpRange.setEnd(tn, s.anchorOffset);
+    const isId = /^\d{15,21}$/.test(q);
+    mpItems = [];
+    if (sign === "@") {
+      for (const sp of ["everyone", "here"]) if (sp.startsWith(q.toLowerCase())) mpItems.push(["@", "@" + sp, "모두 알림", "@" + sp, "@" + sp]);
+      mpItems.push(["@", "@" + (isId ? "사용자 (ID)" : q), "사용자", isId ? "<@" + q + ">" : "@" + q]);
+      mpItems.push(["@", "@" + (isId ? "역할 (ID)" : q), "역할", isId ? "<@&" + q + ">" : "@" + q]);
+    } else {
+      const ch = q.replace(/\s+/g, "-");
+      mpItems.push(["#", "#" + (isId ? "채널 (ID)" : ch), "채널", isId ? "<#" + q + ">" : "#" + ch]);
+    }
+    if (mpIdx >= mpItems.length) mpIdx = -1;
+    mp.innerHTML = '<div class="mhint">고르면 멘션이 됩니다. 그냥 글자로 쓰려면 <b>계속 입력</b>하십시오. (Esc 닫기)</div>';
+    mpItems.forEach(([badge, look, kind], i) => {
+      const it = document.createElement("button"); it.type = "button"; it.className = "mi"; it.setAttribute("role", "option"); it.setAttribute("aria-selected", String(i === mpIdx));
+      it.innerHTML = '<span class="badge">' + badge + '</span><span><span class="who">' + kind + '</span><span class="d">' + esc(look) + (i === 0 ? " · Tab" : "") + "</span></span>";
+      it.addEventListener("mousedown", (e) => e.preventDefault());
+      it.addEventListener("click", () => mpChoose(i));
+      mp.appendChild(it);
+    });
+    const cr = s.getRangeAt(0).getBoundingClientRect();
+    placeMenu(mp, cr.height ? cr : b.getBoundingClientRect()); bub.hidden = true;
+  }
+  function mpChoose(i) {
+    const it = mpItems[i]; if (!it || !mpRange) return;
+    mpClose(); snapshot();
+    const r = mpRange; mpRange = null;
+    r.deleteContents();
+    getSelection().removeAllRanges(); getSelection().addRange(r); saved = r.cloneRange();
+    insertHTML(tok(it[3], it[1]) + "&nbsp;"); after();
+  }
+  function mpKey(e) {
+    if (mp.hidden || e.isComposing) return false;
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault();
+      const n = mpItems.length; mpIdx = e.key === "ArrowDown" ? (mpIdx + 1) % n : (mpIdx <= 0 ? n - 1 : mpIdx - 1);
+      mp.querySelectorAll(".mi").forEach((m, j) => m.setAttribute("aria-selected", String(j === mpIdx)));
+      return true;
+    }
+    if (e.key === "Tab") { e.preventDefault(); mpChoose(mpIdx < 0 ? 0 : mpIdx); return true; }
+    if (e.key === "Enter" && mpIdx >= 0) { e.preventDefault(); mpChoose(mpIdx); return true; }
+    if (e.key === "Escape") {
+      e.preventDefault();
+      const b = curBlock(), r = document.createRange(); r.setStart(b, 0); r.setEnd(mpRange.startContainer, mpRange.startOffset);
+      mpDismiss = { b, at: r.toString().length }; mpClose(); return true;
+    }
+    if (e.key === "Enter") mpClose();
+    return false;
+  }
+  document.addEventListener("mousedown", (e) => { if (!e.target.closest("#mpop")) mpClose(); });
+  ed.addEventListener("keyup", (e) => { if (/^(Arrow(Left|Right)|Home|End)$/.test(e.key)) mpCheck(); });
+  document.addEventListener("selectionchange", () => { if (!mp.hidden && !inEd(document.activeElement)) mpClose(); });
+
   /* ================= 키보드 ================= */
   ed.addEventListener("keydown", (e) => {
-    if (slashKey(e)) return;
+    if (slashKey(e) || mpKey(e)) return;
     if (e.key === "Enter" && !e.isComposing && !(e.ctrlKey || e.metaKey)) {
       const b = curBlock();
       if (e.shiftKey) { e.preventDefault(); snapshot(); document.execCommand("insertParagraph"); after(); return; }
@@ -978,6 +1056,7 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
     }
     after();
     slashCheck();
+    mpCheck();
   });
   ed.addEventListener("paste", (e) => {
     e.preventDefault();
