@@ -97,7 +97,11 @@ a.iconbtn { text-decoration: none; }
 .mi .k { margin-left: auto; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
 .mi .badge { width: 30px; height: 30px; border-radius: 8px; background: var(--surface-2); display: grid; place-items: center; font-size: 12px; font-weight: 700; flex: 0 0 auto; border: 1px solid var(--line); }
 .mi[aria-selected="true"] .badge { background: var(--surface); }
-#mpop { min-width: 240px; }
+#mpop { min-width: 260px; }
+#mpop .mkeys { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 4px; padding: 8px 10px 4px; border-top: 1px solid var(--line); font-size: 12px; color: var(--fg); }
+#mpop .mkeys > span { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
+#mpop .mkeys .kbd { font-size: 11px; }
+@media (hover: none) { #mpop .mkeys { display: none; } }
 #mpop .mhint { padding: 4px 10px 6px; font-size: 11px; color: var(--muted); line-height: 1.45; }
 #mpop .mhint b { color: var(--fg); font-weight: 600; }
 #mpop .mi .who { font-weight: 600; color: var(--fg); }
@@ -375,7 +379,7 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
         <li>그냥 쓰고, 꾸밀 글자를 드래그하면 미니 툴바가 뜹니다.</li>
         <li>줄 맨 앞에서 <span class="kbd">/</span>를 누르면 제목·목록·코드블록·타임스탬프 메뉴가 열립니다.</li>
         <li>다 쓰면 <b>디스코드용으로 복사</b>를 누르고 디스코드에 붙여 넣습니다.</li>
-        <li><span class="kbd">@</span>이름이나 <span class="kbd">#</span>채널을 쓰면 멘션 선택지가 뜹니다. 고르지 않으면 그냥 글자로 남습니다.</li>
+        <li><span class="kbd">@</span>이름이나 <span class="kbd">#</span>채널을 쓰면 멘션 선택지가 뜹니다. <span class="kbd">↑</span><span class="kbd">↓</span>로 고른 뒤 <span class="kbd">Tab</span> 또는 <span class="kbd">Enter</span>를 누르면 멘션이 됩니다. 고르지 않으면 그냥 글자로 남습니다.</li>
         <li>디스코드 메시지를 붙여 넣으면 서식이 살아난 채로 들어옵니다.</li>
       </ol>
       <h3>단축키 (Mac은 ⌘)</h3>
@@ -984,14 +988,15 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
       mpItems.push(["#", "#" + (isId ? "채널 (ID)" : ch), "채널", isId ? "<#" + q + ">" : "#" + ch]);
     }
     if (mpIdx >= mpItems.length) mpIdx = -1;
-    mp.innerHTML = '<div class="mhint">고르면 멘션이 됩니다. 그냥 글자로 쓰려면 <b>계속 입력</b>하십시오. (Esc 닫기)</div>';
+    mp.innerHTML = '<div class="mhint">고르면 멘션이 됩니다. 그냥 글자로 쓰려면 <b>계속 입력</b>하십시오.</div>';
     mpItems.forEach(([badge, look, kind], i) => {
       const it = document.createElement("button"); it.type = "button"; it.className = "mi"; it.setAttribute("role", "option"); it.setAttribute("aria-selected", String(i === mpIdx));
-      it.innerHTML = '<span class="badge">' + badge + '</span><span><span class="who">' + kind + '</span><span class="d">' + esc(look) + (i === 0 ? " · Tab" : "") + "</span></span>";
+      it.innerHTML = '<span class="badge">' + badge + '</span><span><span class="who">' + kind + '</span><span class="d">' + esc(look) + "" + "</span></span>";
       it.addEventListener("mousedown", (e) => e.preventDefault());
       it.addEventListener("click", () => mpChoose(i));
       mp.appendChild(it);
     });
+    mp.insertAdjacentHTML("beforeend", '<div class="mkeys"><span><span class="kbd">↑</span><span class="kbd">↓</span> 고르기</span><span><span class="kbd">Tab</span> 또는 <span class="kbd">Enter</span> 멘션으로</span><span><span class="kbd">Esc</span> 닫기</span></div>');
     const cr = s.getRangeAt(0).getBoundingClientRect();
     placeMenu(mp, cr.height ? cr : b.getBoundingClientRect()); bub.hidden = true;
   }
