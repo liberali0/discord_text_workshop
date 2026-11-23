@@ -98,6 +98,22 @@ a.iconbtn { text-decoration: none; }
 .mi .badge { width: 30px; height: 30px; border-radius: 8px; background: var(--surface-2); display: grid; place-items: center; font-size: 12px; font-weight: 700; flex: 0 0 auto; border: 1px solid var(--line); }
 .mi[aria-selected="true"] .badge { background: var(--surface); }
 #mpop { min-width: 260px; }
+#ed .tok.plain { background: transparent; box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c-fg) 35%, transparent); color: inherit; font-weight: 400; }
+.mi .badge.live { background: color-mix(in srgb, #5865f2 18%, var(--surface)); border-color: color-mix(in srgb, #5865f2 45%, var(--line)); color: #5865f2; }
+.mi .tag { display: inline-block; margin-left: 6px; padding: 0 6px; border-radius: 999px; font-size: 10.5px; font-weight: 600; vertical-align: 1px; }
+.mi .tag.on { background: color-mix(in srgb, #16a34a 16%, transparent); color: #16a34a; }
+.mi .tag.off { background: color-mix(in srgb, var(--muted) 16%, transparent); color: var(--muted); }
+.book { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 12px; background: color-mix(in srgb, #5865f2 7%, var(--surface)); border: 1px solid color-mix(in srgb, #5865f2 22%, var(--line)); }
+.book .bt { font-size: 13px; font-weight: 700; color: var(--fg); }
+.howto { font-size: 12.5px; color: var(--muted); }
+.howto summary { cursor: pointer; color: var(--accent); font-weight: 600; }
+.howto ol { margin: 6px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+.howto code { font-family: var(--font-mono); font-size: 11.5px; background: var(--surface-2); padding: 0 4px; border-radius: 4px; }
+.bitem { display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 10px; border-radius: 9px; background: var(--surface); border: 1px solid var(--line); }
+.bitem .bn { flex: 1; min-width: 0; font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+.bitem .bn small { font-weight: 400; color: var(--muted); margin-left: 6px; font-family: var(--font-mono); font-size: 11px; }
+.bitem button { border: 0; background: none; cursor: pointer; color: var(--muted); border-radius: 6px; padding: 4px 6px; font-size: 12px; }
+.bitem button:hover { background: var(--surface-2); color: var(--fg); }
 #mpop .mkeys { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 4px; padding: 8px 10px 4px; border-top: 1px solid var(--line); font-size: 12px; color: var(--fg); }
 #mpop .mkeys > span { display: inline-flex; align-items: center; gap: 3px; white-space: nowrap; }
 #mpop .mkeys .kbd { font-size: 11px; }
@@ -345,12 +361,26 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
     </section>
 
     <section class="panel" data-p="mention" hidden>
+      <div class="book">
+        <span class="bt">🔔 알림이 가는 진짜 멘션</span>
+        <p class="hint">디스코드는 <b>숫자 ID</b>로 쓴 멘션만 알림을 보냅니다. 이름과 ID를 한 번 저장해 두면, 편집기에서 @이름을 쓸 때 진짜 멘션이 들어갑니다.</p>
+        <div class="segm" id="bType" role="group" aria-label="종류" style="grid-template-columns:repeat(3,minmax(0,1fr))"><button data-t="user" aria-pressed="true">사용자</button><button data-t="role" aria-pressed="false">역할</button><button data-t="channel" aria-pressed="false">채널</button></div>
+        <input type="text" id="bName" aria-label="이름" placeholder="이름 (예: 철수)" autocomplete="off">
+        <div class="inline"><input type="text" id="bId" aria-label="ID" placeholder="ID 또는 &lt;@…&gt; 코드" autocomplete="off" inputmode="numeric"><button class="btn sm" id="bSave">저장</button></div>
+        <details class="howto"><summary>ID는 어떻게 찾습니까?</summary><ol>
+          <li><b>가장 쉬운 방법:</b> 디스코드 채팅창에 <code>\</code>를 쓰고 이어서 <code>@이름</code>(채널은 <code>#채널</code>)을 자동완성에서 고른 뒤 보냅니다. <code>&lt;@123…&gt;</code> 같은 코드가 보이면 통째로 복사해 위 ID 칸에 붙여 넣습니다. 종류는 자동으로 맞춰집니다.</li>
+          <li><b>다른 방법:</b> 디스코드 설정 → 고급 → <b>개발자 모드</b>를 켜고, 사용자·역할·채널을 우클릭(모바일은 길게 누르기) → <b>ID 복사</b>.</li>
+        </ol></details>
+        <div class="list" id="bList"></div>
+        <p class="hint" style="font-size:12px">저장한 목록은 이 브라우저에만 남습니다.</p>
+      </div>
+      <span class="field-l">빠르게 넣기</span>
       <div class="segm" id="mType" role="group" aria-label="태그 종류" style="grid-template-columns:repeat(3,minmax(0,1fr))">
         <button data-t="user" aria-pressed="true">@ 멘션</button><button data-t="channel" aria-pressed="false"># 채널</button><button data-t="emoji" aria-pressed="false">: 이모지</button>
       </div>
       <div class="inline"><input type="text" id="mText" aria-label="태그할 이름" autocomplete="off"><button class="btn sm" id="mInsert">넣기</button><button class="btn sm soft" id="mInsertRole" hidden>역할 ID로</button></div>
       <div class="row" style="gap:6px"><button class="chip" data-quick="@everyone">@everyone</button><button class="chip" data-quick="@here">@here</button></div>
-      <p class="hint">편집기에서 바로 @이름, #채널을 써도 됩니다. 사용자·역할은 모두 <b>@이름</b>으로 똑같이 나갑니다. 숫자 ID를 넣을 때만 사용자 ID와 역할 ID를 고릅니다(봇·웹훅용).</p>
+      <p class="hint">저장한 이름은 진짜 멘션으로, 저장하지 않은 이름은 <b>글자로만</b>(점선 표시, 알림 없음) 들어갑니다.</p>
     </section>
 
     <section class="panel" data-p="tpl" hidden>
@@ -472,6 +502,14 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
     ["R", "상대 시간", relative],
   ];
   const tsText = (unix, f) => (TS.find((x) => x[0] === f) || TS[4])[2](new Date(unix * 1000));
+  /* 진짜 멘션용 ID 주소록 */
+  let BOOK = store.get("book", []);
+  const saveBook = () => store.set("book", BOOK);
+  const SIGN = { user: "@", role: "@", channel: "#" };
+  const RAW = { user: (id) => "<@" + id + ">", role: (id) => "<@&" + id + ">", channel: (id) => "<#" + id + ">" };
+  const bookById = (t, id) => BOOK.find((e) => e.t === t && e.id === id);
+  const bookFind = (sign, q) => { const lq = q.toLowerCase(); return BOOK.filter((e) => SIGN[e.t] === sign && e.n.toLowerCase().startsWith(lq)).sort((a, b) => a.n.length - b.n.length).slice(0, 5); };
+  const bookExact = (sign, n) => BOOK.find((e) => SIGN[e.t] === sign && e.n.toLowerCase() === n.toLowerCase());
   const tok = (raw, label, cls = "") => '<span class="tok ' + cls + '" contenteditable="false" data-raw="' + esc(raw) + '">' + esc(label) + "</span>";
 
   /* ================= ANSI 색표 ================= */
@@ -490,9 +528,9 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
     s = s.replace(/\\([*_~|`>#\\-])/g, (_, c) => keep(c));
     s = s.replace(/`([^`\n]+)`/g, (_, c) => keep("<code>" + c + "</code>"));
     s = s.replace(/&lt;t:(-?\d+)(?::([tTdDfFR]))?&gt;/g, (m, u, f) => keep(tok("<t:" + u + (f ? ":" + f : "") + ">", tsText(+u, f || "f"), "ts")));
-    s = s.replace(/&lt;@!?(\d+)&gt;/g, (m, id) => keep(tok("<@" + id + ">", "@사용자 (ID)")));
-    s = s.replace(/&lt;@&amp;(\d+)&gt;/g, (m, id) => keep(tok("<@&" + id + ">", "@역할 (ID)")));
-    s = s.replace(/&lt;#(\d+)&gt;/g, (m, id) => keep(tok("<#" + id + ">", "# 채널 (ID)")));
+    s = s.replace(/&lt;@!?(\d+)&gt;/g, (m, id) => keep(tok("<@" + id + ">", bookById("user", id) ? "@" + bookById("user", id).n : "@사용자 (ID)")));
+    s = s.replace(/&lt;@&amp;(\d+)&gt;/g, (m, id) => keep(tok("<@&" + id + ">", bookById("role", id) ? "@" + bookById("role", id).n : "@역할 (ID)")));
+    s = s.replace(/&lt;#(\d+)&gt;/g, (m, id) => keep(tok("<#" + id + ">", bookById("channel", id) ? "#" + bookById("channel", id).n : "# 채널 (ID)")));
     s = s.replace(/&lt;\/([\w-]+):(\d+)&gt;/g, (m, n, id) => keep(tok("</" + n + ":" + id + ">", "/" + n)));
     s = s.replace(/&lt;(a?):(\w+):(\d+)&gt;/g, (m, a, n, id) => keep(tok("<" + a + ":" + n + ":" + id + ">", ":" + n + ":")));
     s = s.replace(/@(everyone|here)\b/g, (m, n) => keep(tok("@" + n, "@" + n)));
@@ -978,22 +1016,26 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
     if (tn.nodeType !== 3 || s.anchorOffset < len || tn.data.slice(s.anchorOffset - len, s.anchorOffset) !== sign + q) return mpClose();
     mpRange = document.createRange(); mpRange.setStart(tn, s.anchorOffset - len); mpRange.setEnd(tn, s.anchorOffset);
     const isId = /^\d{15,21}$/.test(q);
+    // [배지, 보이는 글자, 종류, 실제 코드, 진짜 멘션 여부]
     mpItems = [];
+    const KN = { user: "사용자", role: "역할", channel: "채널" };
+    for (const e of bookFind(sign, q)) mpItems.push([sign, sign + e.n, KN[e.t], RAW[e.t](e.id), true]);
     if (sign === "@") {
-      for (const sp of ["everyone", "here"]) if (sp.startsWith(q.toLowerCase())) mpItems.push(["@", "@" + sp, "모두 알림", "@" + sp, "@" + sp]);
+      for (const sp of ["everyone", "here"]) if (sp.startsWith(q.toLowerCase())) mpItems.push(["@", "@" + sp, "모두에게", "@" + sp, true]);
       if (isId) {
-        mpItems.push(["@", "@사용자 (ID)", "사용자 ID", "<@" + q + ">"]);
-        mpItems.push(["@", "@역할 (ID)", "역할 ID", "<@&" + q + ">"]);
-      } else mpItems.push(["@", "@" + q, "멘션", "@" + q]);
+        mpItems.push(["@", "@사용자 (ID)", "사용자 ID", "<@" + q + ">", true]);
+        mpItems.push(["@", "@역할 (ID)", "역할 ID", "<@&" + q + ">", true]);
+      } else if (!bookExact("@", q)) mpItems.push(["@", "@" + q, "글자로만", "@" + q, false]);
     } else {
       const ch = q.replace(/\s+/g, "-");
-      mpItems.push(["#", "#" + (isId ? "채널 (ID)" : ch), "채널", isId ? "<#" + q + ">" : "#" + ch]);
+      if (isId) mpItems.push(["#", "# 채널 (ID)", "채널 ID", "<#" + q + ">", true]);
+      else if (!bookExact("#", q)) mpItems.push(["#", "#" + ch, "글자로만", "#" + ch, false]);
     }
     if (mpIdx < 0 || mpIdx >= mpItems.length) mpIdx = 0;
     mp.innerHTML = '<div class="mhint">누르면 멘션이 됩니다. 그냥 글자로 쓰려면 <b>띄어 쓰고 계속 입력</b>하십시오.</div>';
-    mpItems.forEach(([badge, look, kind], i) => {
+    mpItems.forEach(([badge, look, kind, , live], i) => {
       const it = document.createElement("button"); it.type = "button"; it.className = "mi"; it.setAttribute("role", "option"); it.setAttribute("aria-selected", String(i === mpIdx));
-      it.innerHTML = '<span class="badge">' + badge + '</span><span><span class="who">' + kind + '</span><span class="d">' + esc(look) + "" + "</span></span>";
+      it.innerHTML = '<span class="badge' + (live ? " live" : "") + '">' + badge + '</span><span><span class="who">' + esc(look) + (live ? '<span class="tag on">알림 감</span>' : '<span class="tag off">알림 없음</span>') + '</span><span class="d">' + kind + (live || BOOK.length ? "" : " · ID를 저장하면 진짜 멘션이 됩니다") + "</span></span>";
       it.addEventListener("mousedown", (e) => e.preventDefault());
       it.addEventListener("click", () => mpChoose(i));
       mp.appendChild(it);
@@ -1008,7 +1050,7 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
     const r = mpRange; mpRange = null;
     r.deleteContents();
     getSelection().removeAllRanges(); getSelection().addRange(r); saved = r.cloneRange();
-    insertHTML(tok(it[3], it[1]) + "&nbsp;"); after();
+    insertHTML(tok(it[3], it[1], it[4] ? "" : "plain") + "&nbsp;"); after();
   }
   function mpKey(e) {
     if (mp.hidden || e.isComposing) return false;
@@ -1269,15 +1311,50 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
     const t = mType === "user" && asRole === true ? "role" : mType;
     const [, , byName, byId] = MT[t];
     const isId = /^\d{15,21}$/.test(v) && byId;
-    const raw = isId ? byId(v) : byName(v);
-    const look = isId ? (t === "channel" ? "# 채널" : t === "role" ? "@역할" : "@사용자") + " (ID)" : byName(v);
-    insertTok(tok(raw, look));
+    const saved = !isId && t !== "emoji" ? bookExact(t === "channel" ? "#" : "@", v) : null;
+    const raw = saved ? RAW[saved.t](saved.id) : isId ? byId(v) : byName(v);
+    const look = saved ? SIGN[saved.t] + saved.n : isId ? (t === "channel" ? "# 채널" : t === "role" ? "@역할" : "@사용자") + " (ID)" : byName(v);
+    insertTok(tok(raw, look, saved || isId || t === "emoji" ? "" : "plain"));
     $("mText").value = ""; mIdState();
     toast(look + " 태그를 넣었습니다");
   }
   $("mInsert").addEventListener("click", () => insertMention(false));
   $("mInsertRole").addEventListener("click", () => insertMention(true));
   $("mText").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); insertMention(false); } });
+  let bType = "user";
+  const B_PH = { user: "이름 (예: 철수)", role: "역할 이름 (예: 운영진)", channel: "채널 이름 (예: 공지사항)" };
+  function setBType(t) { bType = t; document.querySelectorAll("#bType button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.t === t))); $("bName").placeholder = B_PH[t]; }
+  document.querySelectorAll("#bType button").forEach((b) => b.addEventListener("click", () => setBType(b.dataset.t)));
+  $("bId").addEventListener("input", () => {
+    const m = $("bId").value.match(/<(@&|@!?|#)(\d{15,21})>/);
+    if (m) { setBType(m[1] === "@&" ? "role" : m[1] === "#" ? "channel" : "user"); $("bId").value = m[2]; }
+  });
+  function renderBook() {
+    const L = $("bList"); L.innerHTML = "";
+    const KN = { user: "사용자", role: "역할", channel: "채널" };
+    BOOK.forEach((e, i) => {
+      const r = document.createElement("div"); r.className = "bitem";
+      r.innerHTML = '<span class="bn" title="눌러서 넣기">' + esc(SIGN[e.t] + e.n) + "<small>" + KN[e.t] + " · " + esc(e.id) + '</small></span><button type="button" data-a="ins">넣기</button><button type="button" data-a="del" aria-label="삭제">✕</button>';
+      const ins = () => { insertTok(tok(RAW[e.t](e.id), SIGN[e.t] + e.n)); toast(SIGN[e.t] + e.n + " 멘션을 넣었습니다"); };
+      r.querySelector(".bn").addEventListener("click", ins);
+      r.querySelector('[data-a="ins"]').addEventListener("click", ins);
+      r.querySelector('[data-a="del"]').addEventListener("click", () => { BOOK.splice(i, 1); saveBook(); renderBook(); toast(SIGN[e.t] + e.n + " 을(를) 지웠습니다"); });
+      L.appendChild(r);
+    });
+  }
+  function saveEntry() {
+    const n = $("bName").value.trim().replace(/^[@#]+/, "").replace(/\s+/g, bType === "channel" ? "-" : " ");
+    const id = $("bId").value.trim();
+    if (!n) { $("bName").focus(); return toast("이름을 써 주십시오"); }
+    if (!/^\d{15,21}$/.test(id)) { $("bId").focus(); return toast("ID는 15~21자리 숫자입니다"); }
+    BOOK = BOOK.filter((e) => !(e.t === bType && (e.n.toLowerCase() === n.toLowerCase() || e.id === id)));
+    BOOK.push({ t: bType, n, id }); saveBook(); renderBook();
+    $("bName").value = ""; $("bId").value = ""; $("bName").focus();
+    toast(SIGN[bType] + n + " 을(를) 저장했습니다. 이제 편집기에서 " + SIGN[bType] + n + " 을 쓰면 진짜 멘션이 됩니다");
+  }
+  $("bSave").addEventListener("click", saveEntry);
+  ["bName", "bId"].forEach((k) => $(k).addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.isComposing) { e.preventDefault(); saveEntry(); } }));
+  renderBook();
   document.querySelectorAll("[data-quick]").forEach((b) => b.addEventListener("click", () => { insertTok(tok(b.dataset.quick, b.dataset.quick)); toast(b.dataset.quick + " 태그를 넣었습니다"); }));
 
   /* --- 템플릿 --- */
