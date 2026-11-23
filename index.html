@@ -119,6 +119,20 @@ a.iconbtn { text-decoration: none; }
 .mi .tag.off { background: color-mix(in srgb, var(--muted) 16%, transparent); color: var(--muted); }
 .book { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 12px; background: color-mix(in srgb, var(--accent) 7%, var(--surface)); border: 1px solid color-mix(in srgb, var(--accent) 22%, var(--line)); }
 .book .bt { font-size: 13px; font-weight: 700; color: var(--fg); }
+.mrule { display: flex; flex-direction: column; gap: 6px; padding: 12px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); }
+.mrule .mr-t { font-size: 13px; font-weight: 700; color: var(--fg); margin-bottom: 2px; }
+.mr-row { display: grid; grid-template-columns: 20px auto 1fr; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+.mr-row i { font-style: normal; font-weight: 800; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; }
+.mr-row.ok i { background: color-mix(in srgb, #23a55a 18%, transparent); color: #1f9d55; }
+.mr-row.no i { background: color-mix(in srgb, #e5484d 16%, transparent); color: #d9363e; }
+.mr-row code { font-size: 12.5px; padding: 2px 6px; border-radius: 6px; background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent); font-weight: 600; white-space: nowrap; }
+.mr-row.no code { background: var(--surface-3); color: var(--muted); text-decoration: line-through; text-decoration-color: color-mix(in srgb, #e5484d 60%, transparent); }
+.mr-row b { color: var(--fg); font-weight: 600; }
+.mstate { margin: 0; font-size: 13px; padding: 8px 10px; border-radius: 10px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.mstate.ok { background: color-mix(in srgb, #23a55a 12%, var(--surface)); color: var(--fg); }
+.mstate.warn { background: color-mix(in srgb, #e5a000 14%, var(--surface)); color: var(--fg); }
+.mstate.info { background: var(--surface-2); color: var(--muted); }
+.mstate .btn { margin-left: auto; }
 .howto { font-size: 12.5px; color: var(--muted); }
 .howto summary { cursor: pointer; color: var(--accent); font-weight: 600; }
 .howto ol { margin: 6px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
@@ -394,8 +408,14 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
         <button data-t="user" aria-pressed="true">@ 멘션</button><button data-t="channel" aria-pressed="false"># 채널</button><button data-t="emoji" aria-pressed="false">: 이모지</button>
       </div>
       <div class="inline"><input type="text" id="mText" aria-label="태그할 이름" autocomplete="off"><button class="btn sm" id="mInsert">넣기</button><button class="btn sm soft" id="mInsertRole" hidden>역할 ID로</button></div>
+      <p class="mstate" id="mState" hidden></p>
       <div class="row" style="gap:6px"><button class="chip" data-quick="@everyone">@everyone</button><button class="chip" data-quick="@here">@here</button></div>
-      <p class="hint">이름으로 넣는 멘션은 <b>디스코드 아이디(사용자명 또는 사용자 ID)</b>와 정확히 같아야 알림이 갑니다. 별명이나 한글 이름으로 쓰려면 위에 저장하십시오.</p>
+      <div class="mrule" aria-label="알림이 가는 멘션 규칙">
+        <span class="mr-t">🔔 이렇게 써야 알림이 갑니다</span>
+        <div class="mr-row ok"><i>✓</i><code>@liberali0_</code><span>디스코드 <b>사용자명</b> 그대로</span></div>
+        <div class="mr-row ok"><i>✓</i><code>@철수</code><span>위 목록에 <b>저장한 이름</b></span></div>
+        <div class="mr-row no"><i>✕</i><code>@철수</code><span>저장하지 않은 별명·한글 이름은 <b>글자로만</b> 보입니다</span></div>
+      </div>
     </section>
 
     <section class="panel" data-p="tpl" hidden>
@@ -1420,6 +1440,21 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
     const idMode = mType === "user" && isIdV();
     $("mInsert").textContent = idMode ? "사용자 ID로" : "넣기";
     $("mInsertRole").hidden = !idMode;
+    mRuleState();
+  }
+  function mRuleState() {
+    const el = $("mState");
+    const v = $("mText").value.trim().replace(/^[@#:]+|:+$/g, "");
+    const show = (cls, html) => { el.hidden = false; el.className = "mstate " + cls; el.innerHTML = "<span>" + html.replace("<button", "</span><button") + (html.includes("<button") ? "" : "</span>"); };
+    if (!v || mType === "emoji") { el.hidden = true; return; }
+    const sign = mType === "channel" ? "#" : "@";
+    const saved = bookExact(sign, v);
+    if (saved) return show("ok", "✓ 저장한 이름입니다. <b>알림이 가는 진짜 멘션</b>으로 들어갑니다.");
+    if (/^\d{15,21}$/.test(v)) return show("ok", "✓ 숫자 ID입니다. <b>진짜 멘션</b>으로 들어갑니다.");
+    if (mType === "channel") return show("info", "ⓘ 채널 이름과 정확히 같아야 채널 링크가 됩니다.");
+    if (/^[a-z0-9_.]{2,32}$/.test(v)) return show("info", "ⓘ <b>@" + esc(v) + "</b>이(가) 디스코드 사용자명이 맞다면 알림이 갑니다.");
+    show("warn", "⚠ 사용자명이 아니라서 <b>알림이 가지 않습니다</b>.<button class=\"btn sm soft\" type=\"button\" id=\"mToBook\">이 이름 저장하기</button>");
+    $("mToBook").onclick = () => { $("bName").value = v; setBType("user"); $("bId").focus(); $("bName").scrollIntoView({ block: "center", behavior: "smooth" }); toast("디스코드 사용자명 또는 ID를 넣고 저장하십시오"); };
   }
   function setMType(t) {
     mType = t;
