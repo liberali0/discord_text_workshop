@@ -368,8 +368,9 @@ textarea { font-family: var(--font-mono); font-size: 13px; min-height: 260px; re
         <input type="text" id="bName" aria-label="이름" placeholder="이름 (예: 철수)" autocomplete="off">
         <div class="inline"><input type="text" id="bId" aria-label="ID" placeholder="ID 또는 &lt;@…&gt; 코드" autocomplete="off" inputmode="numeric"><button class="btn sm" id="bSave">저장</button></div>
         <details class="howto"><summary>ID는 어떻게 찾습니까?</summary><ol>
-          <li><b>방법 1 (확실함):</b> 디스코드 설정 → 고급 → <b>개발자 모드</b>를 켭니다. 사용자·역할·채널을 우클릭(모바일은 길게 누르기) → <b>ID 복사</b>.</li>
-          <li><b>방법 2:</b> 채팅창에 먼저 <code>@이름</code>을 쓰고 <b>자동완성에서 고릅니다</b>. 그다음 커서를 그 멘션 바로 앞으로 옮겨 <code>\</code>를 붙이고 보냅니다. <code>&lt;@123…&gt;</code> 코드가 보이면 통째로 복사해 위 ID 칸에 붙여 넣습니다. 종류는 자동으로 맞춰집니다.</li>
+          <li>디스코드 <b>설정 → 고급 → 개발자 모드</b>를 켭니다.</li>
+          <li>사용자·역할·채널을 우클릭합니다(모바일은 길게 누르기). 역할은 서버 설정 → 역할에서 우클릭합니다.</li>
+          <li><b>ID 복사</b>를 누르고 위 ID 칸에 붙여 넣습니다.</li>
         </ol></details>
         <div class="list" id="bList"></div>
         <p class="hint" style="font-size:12px">저장한 목록은 이 브라우저에만 남습니다.</p>
